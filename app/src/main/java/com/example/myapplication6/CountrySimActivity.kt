@@ -232,6 +232,26 @@ class CountrySimActivity : AppCompatActivity() {
             // Process technology
             TechnologyManager.processResearchTurn(country)
 
+            // Check advancements and milestones
+            AdvancementManager.checkAdvancements(country)
+            val earnedMilestones = AdvancementManager.checkMilestones(country)
+            earnedMilestones.forEach { reward ->
+                showToast("Milestone: $reward")
+            }
+
+            // Update statistics
+            AdvancementManager.statistics.totalTurns++
+            AdvancementManager.statistics.totalGdpEarned += country.gdp * 0.02
+            if (country.gdp > AdvancementManager.statistics.highestGdp) {
+                AdvancementManager.statistics.highestGdp = country.gdp
+            }
+            if (country.stability > AdvancementManager.statistics.highestStability) {
+                AdvancementManager.statistics.highestStability = country.stability
+            }
+            if (country.happiness > AdvancementManager.statistics.highestHappiness) {
+                AdvancementManager.statistics.highestHappiness = country.happiness
+            }
+
             // Update NPCs
             NPCManager.updateAllNPCMoods(country)
             NPCManager.processNPCTurns(country)
