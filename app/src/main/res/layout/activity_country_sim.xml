@@ -383,6 +383,23 @@
                     style="?android:attr/buttonBarButtonStyle" />
             </LinearLayout>
 
+            <!-- Row 3: Advancements -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btnAdvancements"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="🏆 Advancements"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    style="?android:attr/buttonBarButtonStyle" />
+            </LinearLayout>
+
             <Button
                 android:id="@+id/btnNewGame"
                 android:layout_width="match_parent"

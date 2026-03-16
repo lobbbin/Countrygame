@@ -46,6 +46,7 @@ class CountrySimActivity : AppCompatActivity() {
     private lateinit var btnEconomy: Button
     private lateinit var btnPolicies: Button
     private lateinit var btnTechnology: Button
+    private lateinit var btnAdvancements: Button
 
     private lateinit var layoutEvent: LinearLayout
     private lateinit var layoutStats: ScrollView
@@ -112,6 +113,7 @@ class CountrySimActivity : AppCompatActivity() {
         btnEconomy = findViewById(R.id.btnEconomy)
         btnPolicies = findViewById(R.id.btnPolicies)
         btnTechnology = findViewById(R.id.btnTechnology)
+        btnAdvancements = findViewById(R.id.btnAdvancements)
 
         layoutEvent = findViewById(R.id.layoutEvent)
         layoutStats = findViewById(R.id.layoutStats)
@@ -130,6 +132,7 @@ class CountrySimActivity : AppCompatActivity() {
         btnEconomy.setOnClickListener { showEconomyMenu() }
         btnPolicies.setOnClickListener { showPoliciesMenu() }
         btnTechnology.setOnClickListener { showTechnologyMenu() }
+        btnAdvancements.setOnClickListener { showAdvancementsMenu() }
     }
 
     private fun startNewGame() {
@@ -146,6 +149,7 @@ class CountrySimActivity : AppCompatActivity() {
             EconomyManager.initializeEconomy()
             PolicyManager.initializePolicySystem()
             TechnologyManager.initializeTechnology()
+            AdvancementManager.initializeAdvancements()
 
             updateUI()
             showToast("Welcome, President! Lead your nation to prosperity.")
@@ -1479,6 +1483,131 @@ class CountrySimActivity : AppCompatActivity() {
                     .show()
             }
             .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showAdvancementsMenu() {
+        val items = arrayOf(
+            "All Advancements (${AdvancementManager.getAdvancementProgress().first}/${AdvancementManager.getAdvancementProgress().second})",
+            "Economic (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.ECONOMIC).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.ECONOMIC).size})",
+            "Political (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.POLITICAL).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.POLITICAL).size})",
+            "Technological (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.TECHNOLOGICAL).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.TECHNOLOGICAL).size})",
+            "Military (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.MILITARY).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.MILITARY).size})",
+            "Social (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.SOCIAL).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.SOCIAL).size})",
+            "Diplomatic (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.DIPLOMATIC).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.DIPLOMATIC).size})",
+            "Regional (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.REGIONAL).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.REGIONAL).size})",
+            "Special (${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.SPECIAL).count { it.isUnlocked }}/${AdvancementManager.getAdvancementsByCategory(AdvancementCategory.SPECIAL).size})",
+            "Statistics",
+            "Milestones"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("🏆 Advancements - ${AdvancementManager.totalAdvancementPoints} pts")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showAllAdvancements()
+                    1 -> showCategoryAdvancements(AdvancementCategory.ECONOMIC)
+                    2 -> showCategoryAdvancements(AdvancementCategory.POLITICAL)
+                    3 -> showCategoryAdvancements(AdvancementCategory.TECHNOLOGICAL)
+                    4 -> showCategoryAdvancements(AdvancementCategory.MILITARY)
+                    5 -> showCategoryAdvancements(AdvancementCategory.SOCIAL)
+                    6 -> showCategoryAdvancements(AdvancementCategory.DIPLOMATIC)
+                    7 -> showCategoryAdvancements(AdvancementCategory.REGIONAL)
+                    8 -> showCategoryAdvancements(AdvancementCategory.SPECIAL)
+                    9 -> showStatistics()
+                    10 -> showMilestones()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showAllAdvancements() {
+        val unlocked = AdvancementManager.getUnlockedAdvancements()
+        val locked = AdvancementManager.getLockedAdvancements()
+        
+        var message = "🏆 UNLOCKED (${unlocked.size}):\n\n"
+        unlocked.take(10).forEach { adv ->
+            message += "✓ ${adv.name} (${adv.tier})\n"
+        }
+        if (unlocked.size > 10) message += "...and ${unlocked.size - 10} more\n"
+        
+        message += "\n🔒 LOCKED (${locked.size}):\n\n"
+        locked.take(10).forEach { adv ->
+            message += "• ${adv.name} (${adv.tier})\n"
+        }
+        if (locked.size > 10) message += "...and ${locked.size - 10} more\n"
+        
+        AlertDialog.Builder(this)
+            .setTitle("All Advancements")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showCategoryAdvancements(category: AdvancementCategory) {
+        val advancements = AdvancementManager.getAdvancementsByCategory(category)
+        val unlocked = advancements.filter { it.isUnlocked }
+        val locked = advancements.filter { !it.isUnlocked }
+        
+        var message = "✓ UNLOCKED (${unlocked.size}):\n\n"
+        unlocked.forEach { adv ->
+            message += "• ${adv.name}\n  ${adv.rewardDescription}\n\n"
+        }
+        
+        message += "\n🔒 LOCKED (${locked.size}):\n\n"
+        locked.forEach { adv ->
+            message += "• ${adv.name}\n  ${adv.description}\n\n"
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("${category.name} Advancements")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showStatistics() {
+        val stats = AdvancementManager.statistics
+        var message = "📊 GAME STATISTICS\n\n"
+        message += "Turns Played: ${stats.totalTurns}\n"
+        message += "Total GDP Earned: $${String.format("%,d", stats.totalGdpEarned.toLong())}\n"
+        message += "Total Treasury Spent: $${String.format("%,d", stats.totalTreasurySpent.toLong())}\n"
+        message += "Laws Passed: ${stats.lawsPassed}\n"
+        message += "Technologies Researched: ${stats.technologiesResearched}\n"
+        message += "Regions Unlocked: ${stats.regionsUnlocked}\n"
+        message += "Diplomatic Deals: ${stats.diplomaticDealsSigned}\n"
+        message += "Crises Survived: ${stats.crisesSurvived}\n"
+        message += "Elections Won: ${stats.electionsWon}\n"
+        message += "Highest GDP: $${String.format("%,d", stats.highestGdp.toLong())}\n"
+        message += "Highest Stability: ${stats.highestStability}%\n"
+        message += "Highest Happiness: ${stats.highestHappiness}%\n"
+        
+        AlertDialog.Builder(this)
+            .setTitle("📊 Statistics")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showMilestones() {
+        val claimed = AdvancementManager.milestones.filter { it.isClaimed }
+        val unclaimed = AdvancementManager.milestones.filter { !it.isClaimed }
+        
+        var message = "✓ CLAIMED (${claimed.size}):\n\n"
+        claimed.forEach { m ->
+            message += "• ${m.name}: ${m.reward}\n"
+        }
+        
+        message += "\n🔒 REMAINING (${unclaimed.size}):\n\n"
+        unclaimed.forEach { m ->
+            message += "• ${m.name}: ${m.reward}\n"
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("🎯 Milestones")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
             .show()
     }
 
