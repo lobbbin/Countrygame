@@ -202,8 +202,10 @@ object IntelligenceManager : Serializable {
                 
                 // Free up agency slot
                 val agency = agencies.find { it.type == getAgencyTypeForOperation(op.type) }
-                agency?.activeOperations = (agency.activeOperations - 1).coerceAtLeast(0)
-                
+                agency?.let {
+                    it.activeOperations = (it.activeOperations - 1).coerceAtLeast(0)
+                }
+
                 opsToRemove.add(op)
                 completedOperations.add(op)
             }

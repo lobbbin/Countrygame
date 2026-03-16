@@ -138,7 +138,7 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(4, "Economic Miracle", "Reach $1B GDP",
             AdvancementCategory.ECONOMIC, AdvancementTier.SILVER,
             { country -> country.gdp >= 1000000000 },
-            { country -> country.gdp = (country.gdp * 1.1).toLong() },
+            { country -> country.gdp = country.gdp * 1.1 },
             "+10% GDP"))
         
         advancements.add(Advancement(5, "Trade Master", "Maintain positive trade balance for 10 turns",
@@ -159,11 +159,11 @@ object AdvancementManager : Serializable {
             { country -> country.gdp >= 1000000000000 },
             { country -> country.treasury += 100000000 },
             "+$100M Treasury"))
-        
+
         advancements.add(Advancement(8, "Economic Superpower", "Have $500M treasury surplus",
             AdvancementCategory.ECONOMIC, AdvancementTier.GOLD,
             { country -> country.treasury >= 500000000 },
-            { country -> country.creditRating = "AAA" },
+            { country -> },
             "Best Credit Rating"))
         
         // Diamond
@@ -172,14 +172,14 @@ object AdvancementManager : Serializable {
             { country -> country.gdp >= 10000000000000 },
             { country -> country.treasury += 500000000 },
             "+$500M Treasury"))
-        
+
         // Legendary
         advancements.add(Advancement(10, "Economic God", "Reach $100T GDP",
             AdvancementCategory.ECONOMIC, AdvancementTier.LEGENDARY,
             { country -> country.gdp >= 100000000000000 },
-            { country -> 
+            { country ->
                 country.treasury += 1000000000
-                country.gdp = (country.gdp * 1.5).toLong()
+                country.gdp = country.gdp * 1.5
             },
             "+$1B Treasury, +50% GDP"))
         
@@ -277,67 +277,67 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(24, "Tech Giant", "Research 20 technologies",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.GOLD,
             { country -> TechnologyManager.technologies.count { it.isResearched } >= 20 },
-            { country -> country.gdp = (country.gdp * 1.2).toLong() },
+            { country -> country.gdp = country.gdp * 1.2 },
             "+20% GDP"))
-        
+
         advancements.add(Advancement(25, "Singularity", "Research all technologies",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.LEGENDARY,
             { country -> TechnologyManager.technologies.all { it.isResearched } },
-            { country -> 
-                country.gdp = (country.gdp * 2).toLong()
+            { country ->
+                country.gdp = country.gdp * 2
                 country.education = 100
             },
             "2x GDP, Max Education"))
-        
+
         advancements.add(Advancement(26, "Space Age", "Research space technology",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.GOLD,
             { country -> TechnologyManager.technologies.any { it.category == TechCategory.SPACE && it.isResearched } },
             { country -> country.internationalRelations = (country.internationalRelations + 20).coerceIn(0, 100) },
             "+20 Int'l Relations"))
-        
+
         advancements.add(Advancement(27, "AI Revolution", "Research AI technology",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.GOLD,
             { country -> TechnologyManager.technologies.any { it.name.contains("AI") && it.isResearched } },
-            { country -> country.gdp = (country.gdp * 1.3).toLong() },
+            { country -> country.gdp = country.gdp * 1.3 },
             "+30% GDP"))
-        
+
         advancements.add(Advancement(28, "Green Future", "Research renewable energy",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.SILVER,
             { country -> TechnologyManager.technologies.any { it.name.contains("Renewable") && it.isResearched } },
-            { country -> 
+            { country ->
                 country.environment = (country.environment + 20).coerceIn(0, 100)
-                country.gdp = (country.gdp * 1.1).toLong()
+                country.gdp = country.gdp * 1.1
             },
             "+20 Environment, +10% GDP"))
         
         advancements.add(Advancement(29, "Biotech Pioneer", "Research biotechnology",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.GOLD,
             { country -> TechnologyManager.technologies.any { it.category == TechCategory.BIOTECH && it.isResearched } },
-            { country -> 
+            { country ->
                 country.healthcare = (country.healthcare + 25).coerceIn(0, 100)
                 country.happiness = (country.happiness + 10).coerceIn(0, 100)
             },
             "+25 Healthcare, +10 Happiness"))
-        
+
         advancements.add(Advancement(30, "Quantum Leap", "Research quantum computing",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.DIAMOND,
             { country -> TechnologyManager.technologies.any { it.name.contains("Quantum") && it.isResearched } },
             { country -> country.education = (country.education + 30).coerceIn(0, 100) },
             "+30 Education"))
-        
+
         advancements.add(Advancement(31, "Fusion Power", "Research fusion energy",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.DIAMOND,
             { country -> TechnologyManager.technologies.any { it.name.contains("Fusion") && it.isResearched } },
-            { country -> 
-                country.gdp = (country.gdp * 1.5).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.5
                 country.environment = (country.environment + 30).coerceIn(0, 100)
             },
             "+50% GDP, +30 Environment"))
-        
+
         advancements.add(Advancement(32, "Immortality", "Research mind uploading",
             AdvancementCategory.TECHNOLOGICAL, AdvancementTier.LEGENDARY,
             { country -> TechnologyManager.technologies.any { it.name.contains("Mind") && it.isResearched } },
-            { country -> 
+            { country ->
                 country.happiness = 100
                 country.healthcare = 100
             },
@@ -443,66 +443,66 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(46, "Utopian Society", "Reach 100% happiness",
             AdvancementCategory.SOCIAL, AdvancementTier.LEGENDARY,
             { country -> country.happiness >= 100 },
-            { country -> 
+            { country ->
                 country.stability = 100
-                country.gdp = (country.gdp * 1.2).toLong()
+                country.gdp = country.gdp * 1.2
             },
             "Max Stability, +20% GDP"))
-        
+
         advancements.add(Advancement(47, "Education First", "Reach 70% education",
             AdvancementCategory.SOCIAL, AdvancementTier.SILVER,
             { country -> country.education >= 70 },
-            { country -> country.gdp = (country.gdp * 1.1).toLong() },
+            { country -> country.gdp = country.gdp * 1.1 },
             "+10% GDP"))
-        
+
         advancements.add(Advancement(48, "Knowledge Economy", "Reach 90% education",
             AdvancementCategory.SOCIAL, AdvancementTier.GOLD,
             { country -> country.education >= 90 },
-            { country -> country.gdp = (country.gdp * 1.25).toLong() },
+            { country -> country.gdp = country.gdp * 1.25 },
             "+25% GDP"))
-        
+
         advancements.add(Advancement(49, "Enlightenment", "Reach 100% education",
             AdvancementCategory.SOCIAL, AdvancementTier.DIAMOND,
             { country -> country.education >= 100 },
-            { country -> 
-                country.gdp = (country.gdp * 1.5).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.5
                 TechnologyManager.scientificPrestige = 100.0
             },
             "+50% GDP, Max Prestige"))
-        
+
         advancements.add(Advancement(50, "Healthy Population", "Reach 70% healthcare",
             AdvancementCategory.SOCIAL, AdvancementTier.SILVER,
             { country -> country.healthcare >= 70 },
-            { country -> 
+            { country ->
                 country.happiness = (country.happiness + 10).coerceIn(0, 100)
-                country.population = (country.population * 1.1).toLong()
+                country.population = (country.population * 1.1).toInt()
             },
             "+10 Happiness, +10% Population"))
-        
+
         advancements.add(Advancement(51, "Universal Healthcare", "Reach 90% healthcare",
             AdvancementCategory.SOCIAL, AdvancementTier.GOLD,
             { country -> country.healthcare >= 90 },
-            { country -> 
+            { country ->
                 country.happiness = (country.happiness + 15).coerceIn(0, 100)
-                country.population = (country.population * 1.2).toLong()
+                country.population = (country.population * 1.2).toInt()
             },
             "+15 Happiness, +20% Population"))
-        
+
         advancements.add(Advancement(52, "Green Nation", "Reach 80% environment",
             AdvancementCategory.SOCIAL, AdvancementTier.SILVER,
             { country -> country.environment >= 80 },
-            { country -> 
+            { country ->
                 country.happiness = (country.happiness + 10).coerceIn(0, 100)
-                country.gdp = (country.gdp * 1.1).toLong()
+                country.gdp = country.gdp * 1.1
             },
             "+10 Happiness, +10% GDP"))
-        
+
         advancements.add(Advancement(53, "Carbon Neutral", "Reach 100% environment",
             AdvancementCategory.SOCIAL, AdvancementTier.LEGENDARY,
             { country -> country.environment >= 100 },
-            { country -> 
+            { country ->
                 country.happiness = (country.happiness + 20).coerceIn(0, 100)
-                country.gdp = (country.gdp * 1.3).toLong()
+                country.gdp = country.gdp * 1.3
                 country.environment = 100
             },
             "+20 Happiness, +30% GDP, Max Environment"))
@@ -524,25 +524,25 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(56, "Global Leader", "Have 80+ relations with all nations",
             AdvancementCategory.DIPLOMATIC, AdvancementTier.GOLD,
             { country -> GameWorld.diplomaticRelations.all { it.value >= 80 } },
-            { country -> 
+            { country ->
                 country.internationalRelations = (country.internationalRelations + 20).coerceIn(0, 100)
-                country.gdp = (country.gdp * 1.15).toLong()
+                country.gdp = country.gdp * 1.15
             },
             "+20 Int'l, +15% GDP"))
-        
+
         advancements.add(Advancement(57, "World Government", "Have 100 relations with all nations",
             AdvancementCategory.DIPLOMATIC, AdvancementTier.LEGENDARY,
             { country -> GameWorld.diplomaticRelations.all { it.value >= 100 } },
-            { country -> 
+            { country ->
                 country.internationalRelations = 100
-                country.gdp = (country.gdp * 1.5).toLong()
+                country.gdp = country.gdp * 1.5
             },
             "Max Int'l, +50% GDP"))
-        
+
         advancements.add(Advancement(58, "Trade Empire", "Sign 10 trade deals",
             AdvancementCategory.DIPLOMATIC, AdvancementTier.SILVER,
             { country -> statistics.diplomaticDealsSigned >= 10 },
-            { country -> country.gdp = (country.gdp * 1.2).toLong() },
+            { country -> country.gdp = country.gdp * 1.2 },
             "+20% GDP"))
         
         advancements.add(Advancement(59, "Philanthropist", "Give $100M in foreign aid",
@@ -589,82 +589,82 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(64, "Capital Developer", "Max capital development",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getRegionById(0)?.development ?: 0 >= 90 },
-            { country -> country.gdp = (country.gdp * 1.1).toLong() },
+            { country -> country.gdp = country.gdp * 1.1 },
             "+10% GDP"))
-        
+
         advancements.add(Advancement(65, "Industrial Powerhouse", "Max industrial region",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getRegionById(1)?.development ?: 0 >= 90 },
-            { country -> country.gdp = (country.gdp * 1.15).toLong() },
+            { country -> country.gdp = country.gdp * 1.15 },
             "+15% GDP"))
-        
+
         advancements.add(Advancement(66, "Breadbasket", "Max agricultural region",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getRegionById(2)?.development ?: 0 >= 90 },
-            { country -> 
-                country.gdp = (country.gdp * 1.1).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.1
                 country.happiness = (country.happiness + 5).coerceIn(0, 100)
             },
             "+10% GDP, +5 Happiness"))
-        
+
         advancements.add(Advancement(67, "Trade Hub", "Max coastal region",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getRegionById(3)?.development ?: 0 >= 90 },
-            { country -> 
-                country.gdp = (country.gdp * 1.15).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.15
                 country.internationalRelations = (country.internationalRelations + 10).coerceIn(0, 100)
             },
             "+15% GDP, +10 Int'l"))
-        
+
         advancements.add(Advancement(68, "Resource King", "Max northern region",
             AdvancementCategory.REGIONAL, AdvancementTier.GOLD,
             { country -> GameWorld.getRegionById(4)?.development ?: 0 >= 90 },
-            { country -> 
-                country.gdp = (country.gdp * 1.2).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.2
                 country.military = (country.military + 10).coerceIn(0, 100)
             },
             "+20% GDP, +10 Military"))
-        
+
         advancements.add(Advancement(69, "Secure Border", "Max border region",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getRegionById(5)?.development ?: 0 >= 90 },
-            { country -> 
+            { country ->
                 country.stability = (country.stability + 15).coerceIn(0, 100)
                 country.military = (country.military + 5).coerceIn(0, 100)
             },
             "+15 Stability, +5 Military"))
-        
+
         advancements.add(Advancement(70, "Regional Developer", "Unlock all regions",
             AdvancementCategory.REGIONAL, AdvancementTier.SILVER,
             { country -> GameWorld.getUnlockedRegions().size >= 6 },
-            { country -> country.gdp = (country.gdp * 1.15).toLong() },
+            { country -> country.gdp = country.gdp * 1.15 },
             "+15% GDP"))
-        
+
         advancements.add(Advancement(71, "National Unity", "All regions 80+ loyalty",
             AdvancementCategory.REGIONAL, AdvancementTier.GOLD,
             { country -> GameWorld.getAllRegions().all { it.loyalty >= 80 } },
-            { country -> 
+            { country ->
                 country.stability = (country.stability + 20).coerceIn(0, 100)
                 country.happiness = (country.happiness + 10).coerceIn(0, 100)
             },
             "+20 Stability, +10 Happiness"))
-        
+
         advancements.add(Advancement(72, "Federal Master", "All regions 100 development",
             AdvancementCategory.REGIONAL, AdvancementTier.DIAMOND,
             { country -> GameWorld.getAllRegions().all { it.development >= 100 } },
-            { country -> 
-                country.gdp = (country.gdp * 1.5).toLong()
+            { country ->
+                country.gdp = country.gdp * 1.5
                 country.stability = 100
             },
             "+50% GDP, Max Stability"))
-        
+
         advancements.add(Advancement(73, "Balanced Development", "All regions equal development",
             AdvancementCategory.REGIONAL, AdvancementTier.GOLD,
-            { country -> 
+            { country ->
                 val devs = GameWorld.getAllRegions().map { it.development }
                 (devs.max() - devs.min()) <= 10
             },
-            { country -> 
+            { country ->
                 country.happiness = (country.happiness + 15).coerceIn(0, 100)
                 country.stability = (country.stability + 10).coerceIn(0, 100)
             },
@@ -740,38 +740,38 @@ object AdvancementManager : Serializable {
         
         advancements.add(Advancement(83, "Master of All", "Have 80+ in all stats",
             AdvancementCategory.SPECIAL, AdvancementTier.DIAMOND,
-            { country -> 
-                country.stability >= 80 && country.happiness >= 80 && 
+            { country ->
+                country.stability >= 80 && country.happiness >= 80 &&
                 country.military >= 80 && country.education >= 80 &&
                 country.healthcare >= 80 && country.infrastructure >= 80 &&
                 country.environment >= 80 && country.internationalRelations >= 80
             },
-            { country -> 
+            { country ->
                 country.treasury += 200000000
-                country.gdp = (country.gdp * 1.3).toLong()
+                country.gdp = country.gdp * 1.3
             },
             "+$200M Treasury, +30% GDP"))
-        
+
         advancements.add(Advancement(84, "Flawless Victory", "Have 100 in all stats",
             AdvancementCategory.SPECIAL, AdvancementTier.LEGENDARY,
-            { country -> 
-                country.stability >= 100 && country.happiness >= 100 && 
+            { country ->
+                country.stability >= 100 && country.happiness >= 100 &&
                 country.military >= 100 && country.education >= 100 &&
                 country.healthcare >= 100 && country.infrastructure >= 100 &&
                 country.environment >= 100 && country.internationalRelations >= 100
             },
-            { country -> 
+            { country ->
                 country.treasury += 1000000000
-                country.gdp = (country.gdp * 2).toLong()
+                country.gdp = country.gdp * 2
             },
             "+$1B Treasury, 2x GDP"))
-        
+
         advancements.add(Advancement(85, "True Ending", "Unlock all advancements",
             AdvancementCategory.SPECIAL, AdvancementTier.LEGENDARY,
             { country -> advancements.all { it.isUnlocked } },
-            { country -> 
+            { country ->
                 country.treasury += 5000000000
-                country.gdp = (country.gdp * 3).toLong()
+                country.gdp = country.gdp * 3
                 country.stability = 100
                 country.happiness = 100
             },

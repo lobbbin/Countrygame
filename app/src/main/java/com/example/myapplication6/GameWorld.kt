@@ -11,7 +11,7 @@ object GameWorld : Serializable {
     private val factions = mutableListOf<Faction>()
     private val worldEvents = mutableListOf<WorldEvent>()
     private val unlockedRegions = mutableSetOf<Int>()
-    private val diplomaticRelations = mutableMapOf<Int, Int>()  // Nation ID to relation score
+    val diplomaticRelations = mutableMapOf<Int, Int>()  // Nation ID to relation score (public for access)
 
     var currentThreatLevel: ThreatLevel = ThreatLevel.LOW
     var worldTension: Int = 30  // 0-100

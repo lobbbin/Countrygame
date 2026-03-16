@@ -46,6 +46,8 @@ class CountrySimActivity : AppCompatActivity() {
     private lateinit var btnEconomy: Button
     private lateinit var btnPolicies: Button
     private lateinit var btnTechnology: Button
+    private lateinit var btnCrisis: Button
+    private lateinit var btnIntelligence: Button
     private lateinit var btnAdvancements: Button
 
     private lateinit var layoutEvent: LinearLayout
@@ -113,6 +115,8 @@ class CountrySimActivity : AppCompatActivity() {
         btnEconomy = findViewById(R.id.btnEconomy)
         btnPolicies = findViewById(R.id.btnPolicies)
         btnTechnology = findViewById(R.id.btnTechnology)
+        btnCrisis = findViewById(R.id.btnCrisis)
+        btnIntelligence = findViewById(R.id.btnIntelligence)
         btnAdvancements = findViewById(R.id.btnAdvancements)
 
         layoutEvent = findViewById(R.id.layoutEvent)
@@ -132,6 +136,8 @@ class CountrySimActivity : AppCompatActivity() {
         btnEconomy.setOnClickListener { showEconomyMenu() }
         btnPolicies.setOnClickListener { showPoliciesMenu() }
         btnTechnology.setOnClickListener { showTechnologyMenu() }
+        btnCrisis.setOnClickListener { showCrisisMenu() }
+        btnIntelligence.setOnClickListener { showIntelligenceMenu() }
         btnAdvancements.setOnClickListener { showAdvancementsMenu() }
     }
 
@@ -150,6 +156,8 @@ class CountrySimActivity : AppCompatActivity() {
             PolicyManager.initializePolicySystem()
             TechnologyManager.initializeTechnology()
             AdvancementManager.initializeAdvancements()
+            CrisisManager.initializeCrisisSystem()
+            IntelligenceManager.initializeIntelligence()
 
             updateUI()
             showToast("Welcome, President! Lead your nation to prosperity.")
@@ -241,6 +249,21 @@ class CountrySimActivity : AppCompatActivity() {
             val earnedMilestones = AdvancementManager.checkMilestones(country)
             earnedMilestones.forEach { reward ->
                 showToast("Milestone: $reward")
+            }
+
+            // Check for new crises
+            val newCrisis = CrisisManager.checkForNewCrisis(country)
+            if (newCrisis != null) {
+                showToast("⚠️ CRISIS: ${newCrisis.name}!")
+            }
+
+            // Process active crises
+            CrisisManager.processCrisisTurn(country)
+
+            // Process intelligence operations
+            val opResults = IntelligenceManager.processOperations(country)
+            opResults.forEach { result ->
+                showToast(result)
             }
 
             // Update statistics
@@ -535,10 +558,10 @@ class CountrySimActivity : AppCompatActivity() {
             "Diplomatic Relations",
             "Threat Level & Security"
         )
-        
+
         AlertDialog.Builder(this)
             .setTitle("World Management")
-            .setItems(items) { _, which ->
+            .setItems(items) { _: android.content.DialogInterface, which: Int ->
                 when (which) {
                     0 -> showWorldReport()
                     1 -> showFactionsMenu()
@@ -560,14 +583,14 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun showFactionsMenu() {
-        val factions = PolicyManager.getAllFactions()
-        val factionNames = factions.map { f -> 
-            "${f.name} (${f.ideology})\nPower: ${f.power}% | ${if (f.isLegal) "Legal" else "Illegal"}" 
+        val factions = GameWorld.getAllFactions()
+        val factionNames = factions.map { f ->
+            "${f.name} (${f.ideology})\nPower: ${f.power}% | ${if (f.isLegal) "Legal" else "Illegal"}"
         }.toTypedArray()
-        
+
         AlertDialog.Builder(this)
             .setTitle("Political Factions")
-            .setItems(factionNames) { _, which ->
+            .setItems(factionNames) { _: android.content.DialogInterface, which: Int ->
                 val faction = factions[which]
                 var message = "${faction.name}\n\n"
                 message += "${faction.description}\n\n"
@@ -576,15 +599,15 @@ class CountrySimActivity : AppCompatActivity() {
                 message += "Power: ${faction.power}%\n"
                 message += "Status: ${if (faction.isLegal) "✓ Legal" else "⚠ Illegal"}\n\n"
                 message += "Goals:\n"
-                faction.goals.forEach { goal ->
+                faction.goals.forEach { goal: String ->
                     message += "- $goal\n"
                 }
-                
+
                 AlertDialog.Builder(this)
                     .setTitle(faction.name)
                     .setMessage(message)
                     .setPositiveButton("OK", null)
-                    .setNeutralButton(if (faction.isLegal) "Ban Faction" else "Legalize Faction") { _, _ ->
+                    .setNeutralButton(if (faction.isLegal) "Ban Faction" else "Legalize Faction") { _: android.content.DialogInterface, _: Int ->
                         toggleFactionLegality(faction)
                     }
                     .show()
@@ -593,7 +616,7 @@ class CountrySimActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun toggleFactionLegality(faction: PolicyManager.Faction) {
+    private fun toggleFactionLegality(faction: GameWorld.Faction) {
         if (faction.isLegal) {
             // Ban faction
             faction.isLegal = false
@@ -698,17 +721,17 @@ class CountrySimActivity : AppCompatActivity() {
         message += "World Tension: ${GameWorld.worldTension}%\n"
         message += "Global Economy: ${GameWorld.globalEconomyState}\n\n"
         message += "Active Crises: ${GameWorld.activeCrises}\n"
-        
+
         val activeEvents = GameWorld.getActiveEvents()
         if (activeEvents.isNotEmpty()) {
             message += "\nActive Events:\n"
             activeEvents.forEach { event ->
-                message += "- ${event.title} (${event.turnsRemaining} turns)\n"
+                message += "- ${event.title} (${event.isActiveTurns} turns)\n"
             }
         } else {
             message += "\nNo active crises.\n"
         }
-        
+
         message += "\n=== RECOMMENDATIONS ===\n"
         when (GameWorld.currentThreatLevel) {
             GameWorld.ThreatLevel.LOW -> message += "• Maintain current policies\n• Focus on economic growth"
@@ -716,7 +739,7 @@ class CountrySimActivity : AppCompatActivity() {
             GameWorld.ThreatLevel.HIGH -> message += "• Increase military readiness\n• Seek international alliances\n• Prepare emergency measures"
             GameWorld.ThreatLevel.CRITICAL -> message += "• EMERGENCY: Consider emergency powers\n• Mobilize military\n• Seek immediate international support"
         }
-        
+
         AlertDialog.Builder(this)
             .setTitle("National Security")
             .setMessage(message)
@@ -1608,6 +1631,257 @@ class CountrySimActivity : AppCompatActivity() {
             .setTitle("🎯 Milestones")
             .setMessage(message)
             .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showIntelligenceMenu() {
+        val items = arrayOf(
+            "Intelligence Report",
+            "Start Operation",
+            "Recruit Asset",
+            "Upgrade Agencies"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("🕵️ Intelligence Agency")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showIntelReport()
+                    1 -> showOperationsMenu()
+                    2 -> showRecruitAssetMenu()
+                    3 -> showUpgradeAgenciesMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showIntelReport() {
+        val report = IntelligenceManager.getIntelligenceReport()
+        AlertDialog.Builder(this)
+            .setTitle("Intelligence Report")
+            .setMessage(report)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showOperationsMenu() {
+        val ops = IntelligenceManager.getAvailableOperations()
+        val opNames = ops.map { op -> 
+            "${op.name}\n${op.type} | Difficulty: ${op.difficulty}% | Cost: $${String.format("%,d", (op.cost / 1000000).toLong())}M" 
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Start Intelligence Operation")
+            .setItems(opNames) { _, which ->
+                val op = ops[which]
+                var message = "${op.name}\n\n${op.description}\n\n"
+                message += "Type: ${op.type}\n"
+                message += "Target: ${op.target}\n"
+                message += "Difficulty: ${op.difficulty}%\n"
+                message += "Duration: ${op.duration} turns\n"
+                message += "Success Chance: ${(op.successChance * 100).toInt()}%\n"
+                message += "Cost: $${String.format("%,d", (op.cost / 1000000).toLong())}M\n\n"
+                message += "Rewards:\n"
+                op.rewards.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                message += "\nFailure Consequences:\n"
+                op.failureConsequences.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                
+                AlertDialog.Builder(this)
+                    .setTitle("Start Operation")
+                    .setMessage(message)
+                    .setPositiveButton("Launch Operation") { _, _ ->
+                        val result = IntelligenceManager.startOperation(op, country)
+                        showToast(result)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showRecruitAssetMenu() {
+        val assetTypes = IntelligenceManager.AssetType.values()
+        val typeNames = assetTypes.map { it.name }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Recruit Asset - Select Type")
+            .setItems(typeNames) { _, which ->
+                val type = assetTypes[which]
+                val codename = "Asset-${System.currentTimeMillis().toInt() % 10000}"
+                val location = GameWorld.getNationName((Math.random() * 6).toInt())
+                val cost = (5000000..20000000).random().toDouble()
+                
+                if (IntelligenceManager.recruitAsset(codename, type, location, cost, country)) {
+                    showToast("Asset recruited: $codename (${type})")
+                } else {
+                    showToast("Insufficient funds!")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showUpgradeAgenciesMenu() {
+        val agencies = IntelligenceManager.agencies
+        val agencyNames = agencies.map { a -> "${a.name}\nBudget: $${String.format("%,d", (a.budget / 1000000).toLong())}M | Personnel: ${a.personnel}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Upgrade Intelligence Agencies")
+            .setItems(agencyNames) { _, which ->
+                val agency = agencies[which]
+                val message = "${agency.name}\n\n"
+                message += "Type: ${agency.type}\n"
+                message += "Budget: $${String.format("%,d", (agency.budget / 1000000).toLong())}M\n"
+                message += "Personnel: ${agency.personnel}\n"
+                message += "Capability: ${agency.capability}/100\n"
+                message += "Director: ${agency.director}\n"
+                message += "HQ: ${agency.headquarters}\n"
+                message += "Active Ops: ${agency.activeOperations}/${agency.maxOperations}\n\n"
+                message += "Upgrades:\n"
+                message += "• +10 Personnel - $1M\n"
+                message += "• +$5M Budget - $2M\n"
+                
+                AlertDialog.Builder(this)
+                    .setTitle(agency.name)
+                    .setMessage(message)
+                    .setPositiveButton("+10 Personnel ($1M)") { _, _ ->
+                        IntelligenceManager.upgradeAgency("personnel", 10, 1000000.0, country, agency.id)
+                    }
+                    .setNegativeButton("+$5M Budget ($2M)") { _, _ ->
+                        IntelligenceManager.upgradeAgency("budget", 5000000, 2000000.0, country, agency.id)
+                    }
+                    .setNeutralButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showCrisisMenu() {
+        val items = arrayOf(
+            "Crisis Report",
+            "Emergency Services",
+            "Disaster Preparedness",
+            "Upgrade Services"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("⚠️ Crisis Management")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showCrisisReport()
+                    1 -> showEmergencyServicesMenu()
+                    2 -> showPreparednessMenu()
+                    3 -> showUpgradeServicesMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showCrisisReport() {
+        val report = CrisisManager.getCrisisReport()
+        AlertDialog.Builder(this)
+            .setTitle("Crisis Report")
+            .setMessage(report)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showEmergencyServicesMenu() {
+        val services = CrisisManager.emergencyServices
+        var message = "=== EMERGENCY SERVICES ===\n\n"
+        message += "Police:\n"
+        message += "  Funding: $${String.format("%,d", (services.policeFunding / 1000000).toLong())}M\n"
+        message += "  Personnel: ${services.policePersonnel}\n"
+        message += "\nFire Department:\n"
+        message += "  Funding: $${String.format("%,d", (services.fireFunding / 1000000).toLong())}M\n"
+        message += "  Personnel: ${services.firePersonnel}\n"
+        message += "\nEMS:\n"
+        message += "  Funding: $${String.format("%,d", (services.emsFunding / 1000000).toLong())}M\n"
+        message += "  Personnel: ${services.emsPersonnel}\n"
+        message += "\nFEMA:\n"
+        message += "  Funding: $${String.format("%,d", (services.femaFunding / 1000000).toLong())}M\n"
+        message += "\n=== PERFORMANCE ===\n"
+        message += "Response Time: ${services.responseTime} min\n"
+        message += "Success Rate: ${services.successRate.toInt()}%\n"
+        
+        AlertDialog.Builder(this)
+            .setTitle("Emergency Services")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showPreparednessMenu() {
+        val prep = CrisisManager.preparedness
+        var message = "=== DISASTER PREPAREDNESS ===\n\n"
+        message += "Early Warning System: ${prep.earlyWarningSystem}%\n"
+        message += "Evacuation Plans: ${prep.evacuationPlans}%\n"
+        message += "Emergency Shelters: ${prep.emergencyShelters}%\n"
+        message += "Emergency Stockpiles: ${prep.stockpiles}%\n"
+        message += "Training Level: ${prep.trainingLevel}%\n"
+        message += "Public Awareness: ${prep.publicAwareness}%\n"
+        message += "Infrastructure Resilience: ${prep.infrastructureResilience}%\n"
+        message += "Communication Systems: ${prep.communicationSystems}%\n"
+        message += "\nOverall Score: ${CrisisManager.getPreparednessScore().toInt()}%\n"
+        message += "\nCrisis Risk: ${CrisisManager.crisisRisk.toInt()}%"
+        
+        AlertDialog.Builder(this)
+            .setTitle("Disaster Preparedness")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showUpgradeServicesMenu() {
+        val upgradeOptions = arrayOf(
+            "+10 Police Personnel ($500K)",
+            "+10 Fire Personnel ($500K)",
+            "+10 EMS Personnel ($500K)",
+            "+$5M Police Funding ($1M)",
+            "+$5M Fire Funding ($1M)",
+            "+$5M EMS Funding ($1M)",
+            "+$2M FEMA Funding ($500K)",
+            "+5 Early Warning ($2M)",
+            "+5 Evacuation Plans ($2M)",
+            "+5 Emergency Shelters ($3M)",
+            "+5 Stockpiles ($2M)",
+            "+5 Training ($1M)",
+            "+5 Public Awareness ($1M)",
+            "+5 Infrastructure Resilience ($5M)",
+            "+5 Communication Systems ($3M)"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("Upgrade Services & Preparedness")
+            .setItems(upgradeOptions) { _, which ->
+                when (which) {
+                    0 -> CrisisManager.upgradeEmergencyServices("policePersonnel", 10, 500000.0, country)
+                    1 -> CrisisManager.upgradeEmergencyServices("firePersonnel", 10, 500000.0, country)
+                    2 -> CrisisManager.upgradeEmergencyServices("emsPersonnel", 10, 500000.0, country)
+                    3 -> CrisisManager.upgradeEmergencyServices("policeFunding", 5000000, 1000000.0, country)
+                    4 -> CrisisManager.upgradeEmergencyServices("fireFunding", 5000000, 1000000.0, country)
+                    5 -> CrisisManager.upgradeEmergencyServices("emsFunding", 5000000, 1000000.0, country)
+                    6 -> CrisisManager.upgradeEmergencyServices("femaFunding", 2000000, 500000.0, country)
+                    7 -> CrisisManager.upgradePreparedness("earlyWarning", 5, 2000000.0, country)
+                    8 -> CrisisManager.upgradePreparedness("evacuation", 5, 2000000.0, country)
+                    9 -> CrisisManager.upgradePreparedness("shelters", 5, 3000000.0, country)
+                    10 -> CrisisManager.upgradePreparedness("stockpiles", 5, 2000000.0, country)
+                    11 -> CrisisManager.upgradePreparedness("training", 5, 1000000.0, country)
+                    12 -> CrisisManager.upgradePreparedness("awareness", 5, 1000000.0, country)
+                    13 -> CrisisManager.upgradePreparedness("resilience", 5, 5000000.0, country)
+                    14 -> CrisisManager.upgradePreparedness("communication", 5, 3000000.0, country)
+                }
+                showToast("Upgrade complete!")
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 

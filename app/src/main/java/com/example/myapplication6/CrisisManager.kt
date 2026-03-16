@@ -41,9 +41,9 @@ data class Crisis(
     val name: String,
     val description: String,
     val type: CrisisType,
-    val severity: CrisisSeverity,
+    var severity: CrisisSeverity,
     val region: Int,
-    val turnsActive: Int,
+    var turnsActive: Int,
     val maxTurns: Int,
     val effects: Map<String, Double>,
     val responseOptions: List<CrisisResponse>,
@@ -149,10 +149,10 @@ object CrisisManager : Serializable {
     private fun generateCrisis(country: Country): Crisis {
         val crisisTemplates = getCrisisTemplates()
         val template = crisisTemplates.random()
-        
+
         // Determine severity based on country stats
         val severity = determineSeverity(country)
-        
+
         // Calculate casualties and damage
         val baseCasualties = when (severity) {
             CrisisSeverity.MINOR -> (10..100).random()
@@ -161,18 +161,19 @@ object CrisisManager : Serializable {
             CrisisSeverity.SEVERE -> (10000..100000).random()
             CrisisSeverity.CATASTROPHIC -> (100000..1000000).random()
         }
-        
+
         val baseDamage = when (severity) {
-            CrisisSeverity.MINOR -> (1000000.0..10000000.0).random()
-            CrisisSeverity.MODERATE -> (10000000.0..100000000.0).random()
-            CrisisSeverity.MAJOR -> (100000000.0..500000000.0).random()
-            CrisisSeverity.SEVERE -> (500000000.0..2000000000.0).random()
-            CrisisSeverity.CATASTROPHIC -> (2000000000.0..10000000000.0).random()
+            CrisisSeverity.MINOR -> 1000000.0 + Math.random() * 9000000.0
+            CrisisSeverity.MODERATE -> 10000000.0 + Math.random() * 90000000.0
+            CrisisSeverity.MAJOR -> 100000000.0 + Math.random() * 400000000.0
+            CrisisSeverity.SEVERE -> 500000000.0 + Math.random() * 1500000000.0
+            CrisisSeverity.CATASTROPHIC -> 2000000000.0 + Math.random() * 8000000000.0
         }
-        
+
         // Determine affected region
-        val region = if (GameWorld.getUnlockedRegions().isNotEmpty()) {
-            GameWorld.getUnlockedRegions().random().id
+        val unlockedRegions = GameWorld.getUnlockedRegions()
+        val region = if (unlockedRegions.isNotEmpty()) {
+            unlockedRegions.random().id
         } else {
             0
         }
@@ -266,13 +267,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("infrastructure" to -20.0, "environment" to -15.0, "gdp" to -40000000.0, "happiness" to -15.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Mass Evacuation", "Evacuate all coastal areas",
-                        30000000.0, 0.85, 0.15, mapOf("infrastructure" to 50),
+                        30000000.0, 0.85, 0.15, mapOf<String, Int>("infrastructure" to 50),
                         mapOf("happiness" to 5.0, "stability" to 5.0)),
                     CrisisResponse(2, "Emergency Shelters", "Open emergency shelters",
-                        10000000.0, 0.6, 0.1, mapOf("preparedness" to 40),
+                        10000000.0, 0.6, 0.1, mapOf<String, Int>("preparedness" to 40),
                         mapOf("happiness" to 10.0)),
                     CrisisResponse(3, "Do Nothing", "Hope for the best",
-                        0.0, 0.2, 0.8, mapOf(),
+                        0.0, 0.2, 0.8, mapOf<String, Int>(),
                         mapOf("happiness" to -20.0, "stability" to -15.0))
                 )
             ),
@@ -283,17 +284,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("environment" to -30.0, "infrastructure" to -10.0, "happiness" to -10.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Aerial Firefighting", "Deploy firefighting aircraft",
-                        25000000.0, 0.8, 0.1, mapOf("treasury" to 20000000.0),
+                        25000000.0, 0.8, 0.1, mapOf<String, Int>(),
                         mapOf("environment" to 15.0, "infrastructure" to 5.0)),
                     CrisisResponse(2, "Ground Crews", "Deploy firefighter teams",
-                        10000000.0, 0.6, 0.2, mapOf("emergencyServices" to 50),
+                        10000000.0, 0.6, 0.2, mapOf<String, Int>("emergencyServices" to 50),
                         mapOf("environment" to 10.0)),
                     CrisisResponse(3, "Controlled Burn", "Create firebreaks with controlled burns",
-                        5000000.0, 0.7, 0.3, mapOf(),
+                        5000000.0, 0.7, 0.3, mapOf<String, Int>(),
                         mapOf("environment" to -5.0, "infrastructure" to 5.0))
                 )
             ),
-            
+
             // Economic Crises
             CrisisTemplate(
                 name = "Stock Market Crash",
@@ -302,13 +303,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("gdp" to -100000000.0, "treasury" to -30000000.0, "happiness" to -25.0, "stability" to -15.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Market Intervention", "Buy stocks to stabilize market",
-                        100000000.0, 0.75, 0.2, mapOf("treasury" to 100000000.0),
+                        100000000.0, 0.75, 0.2, mapOf<String, Int>("treasury" to 100000000),
                         mapOf("gdp" to 50000000.0, "happiness" to 10.0)),
                     CrisisResponse(2, "Bank Bailout", "Bail out failing banks",
-                        75000000.0, 0.65, 0.3, mapOf("treasury" to 50000000.0),
+                        75000000.0, 0.65, 0.3, mapOf<String, Int>("treasury" to 50000000),
                         mapOf("stability" to 10.0, "happiness" to -10.0)),
                     CrisisResponse(3, "Let Market Correct", "Allow natural market correction",
-                        0.0, 0.4, 0.5, mapOf(),
+                        0.0, 0.4, 0.5, mapOf<String, Int>(),
                         mapOf("gdp" to -50000000.0, "happiness" to -15.0))
                 )
             ),
@@ -319,17 +320,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("treasury" to -50000000.0, "gdp" to -80000000.0, "stability" to -25.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Bank Holiday", "Temporarily close all banks",
-                        10000000.0, 0.7, 0.3, mapOf("stability" to 40),
+                        10000000.0, 0.7, 0.3, mapOf<String, Int>("stability" to 40),
                         mapOf("stability" to 15.0, "happiness" to -10.0)),
                     CrisisResponse(2, "Deposit Guarantee", "Guarantee all deposits",
-                        50000000.0, 0.8, 0.15, mapOf("treasury" to 50000000.0),
+                        50000000.0, 0.8, 0.15, mapOf<String, Int>("treasury" to 50000000),
                         mapOf("stability" to 20.0, "happiness" to 5.0)),
                     CrisisResponse(3, "Nationalize Banks", "Take control of failing banks",
-                        100000000.0, 0.85, 0.4, mapOf(),
+                        100000000.0, 0.85, 0.4, mapOf<String, Int>(),
                         mapOf("stability" to 10.0, "gdp" to 30000000.0, "internationalRelations" to -10.0))
                 )
             ),
-            
+
             // Health Emergencies
             CrisisTemplate(
                 name = "Pandemic Outbreak",
@@ -338,13 +339,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("healthcare" to -30.0, "gdp" to -150000000.0, "happiness" to -30.0, "population" to -50000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Lockdown", "Implement strict lockdown measures",
-                        50000000.0, 0.8, 0.2, mapOf("healthcare" to 50),
+                        50000000.0, 0.8, 0.2, mapOf<String, Int>("healthcare" to 50),
                         mapOf("healthcare" to 20.0, "gdp" to -50000000.0, "happiness" to -10.0)),
                     CrisisResponse(2, "Targeted Measures", "Targeted restrictions in hotspots",
-                        20000000.0, 0.5, 0.3, mapOf(),
+                        20000000.0, 0.5, 0.3, mapOf<String, Int>(),
                         mapOf("healthcare" to 10.0, "gdp" to -30000000.0)),
                     CrisisResponse(3, "Herd Immunity", "Allow natural immunity to develop",
-                        5000000.0, 0.3, 0.7, mapOf(),
+                        5000000.0, 0.3, 0.7, mapOf<String, Int>(),
                         mapOf("population" to -100000.0, "healthcare" to -50.0, "happiness" to -40.0))
                 )
             ),
@@ -355,17 +356,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("healthcare" to -40.0, "happiness" to -25.0, "stability" to -15.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Emergency Hospitals", "Build field hospitals",
-                        40000000.0, 0.85, 0.1, mapOf("treasury" to 30000000.0),
+                        40000000.0, 0.85, 0.1, mapOf<String, Int>("treasury" to 30000000),
                         mapOf("healthcare" to 30.0, "happiness" to 10.0)),
                     CrisisResponse(2, "Medical Staff Surge", "Call in all medical reserves",
-                        15000000.0, 0.6, 0.15, mapOf("healthcare" to 40),
+                        15000000.0, 0.6, 0.15, mapOf<String, Int>("healthcare" to 40),
                         mapOf("healthcare" to 20.0)),
                     CrisisResponse(3, "Ration Care", "Prioritize critical cases only",
-                        5000000.0, 0.4, 0.5, mapOf(),
+                        5000000.0, 0.4, 0.5, mapOf<String, Int>(),
                         mapOf("happiness" to -30.0, "stability" to -20.0, "healthcare" to 10.0))
                 )
             ),
-            
+
             // Political Crises
             CrisisTemplate(
                 name = "Government Collapse",
@@ -374,13 +375,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("stability" to -40.0, "happiness" to -20.0, "internationalRelations" to -15.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Snap Elections", "Call immediate elections",
-                        20000000.0, 0.7, 0.2, mapOf("stability" to 30),
+                        20000000.0, 0.7, 0.2, mapOf<String, Int>("stability" to 30),
                         mapOf("stability" to 20.0, "happiness" to 10.0)),
                     CrisisResponse(2, "Coalition Building", "Form new coalition government",
-                        10000000.0, 0.6, 0.3, mapOf(),
+                        10000000.0, 0.6, 0.3, mapOf<String, Int>(),
                         mapOf("stability" to 15.0)),
                     CrisisResponse(3, "Emergency Powers", "Rule by emergency decree",
-                        5000000.0, 0.5, 0.6, mapOf(),
+                        5000000.0, 0.5, 0.6, mapOf<String, Int>(),
                         mapOf("stability" to 25.0, "happiness" to -25.0, "internationalRelations" to -20.0))
                 )
             ),
@@ -391,17 +392,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("stability" to -20.0, "happiness" to -30.0, "internationalRelations" to -10.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Full Investigation", "Launch independent investigation",
-                        10000000.0, 0.8, 0.15, mapOf("stability" to 40),
+                        10000000.0, 0.8, 0.15, mapOf<String, Int>("stability" to 40),
                         mapOf("stability" to 15.0, "happiness" to 15.0)),
                     CrisisResponse(2, "Resignations", "Force resignations of officials",
-                        5000000.0, 0.6, 0.2, mapOf(),
+                        5000000.0, 0.6, 0.2, mapOf<String, Int>(),
                         mapOf("happiness" to 20.0, "stability" to -5.0)),
                     CrisisResponse(3, "Cover Up", "Attempt to suppress the scandal",
-                        15000000.0, 0.3, 0.7, mapOf(),
+                        15000000.0, 0.3, 0.7, mapOf<String, Int>(),
                         mapOf("happiness" to -40.0, "stability" to -30.0))
                 )
             ),
-            
+
             // Military Conflicts
             CrisisTemplate(
                 name = "Border Skirmish",
@@ -410,17 +411,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("military" to -15.0, "stability" to -20.0, "internationalRelations" to -25.0, "treasury" to -30000000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Military Escalation", "Respond with full military force",
-                        50000000.0, 0.7, 0.4, mapOf("military" to 60),
+                        50000000.0, 0.7, 0.4, mapOf<String, Int>("military" to 60),
                         mapOf("military" to -10.0, "stability" to 10.0, "internationalRelations" to -20.0)),
                     CrisisResponse(2, "Defensive Posture", "Hold positions defensively",
-                        20000000.0, 0.6, 0.2, mapOf("military" to 50),
+                        20000000.0, 0.6, 0.2, mapOf<String, Int>("military" to 50),
                         mapOf("stability" to 5.0, "internationalRelations" to -10.0)),
                     CrisisResponse(3, "Ceasefire", "Immediately seek ceasefire",
-                        5000000.0, 0.5, 0.3, mapOf(),
+                        5000000.0, 0.5, 0.3, mapOf<String, Int>(),
                         mapOf("internationalRelations" to 10.0, "stability" to -15.0, "military" to -10.0))
                 )
             ),
-            
+
             // Terrorist Attacks
             CrisisTemplate(
                 name = "Terrorist Attack",
@@ -429,17 +430,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("stability" to -35.0, "happiness" to -40.0, "population" to -5000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Security Crackdown", "Implement strict security measures",
-                        40000000.0, 0.75, 0.25, mapOf("military" to 50, "stability" to 40),
+                        40000000.0, 0.75, 0.25, mapOf<String, Int>("military" to 50, "stability" to 40),
                         mapOf("stability" to 20.0, "happiness" to -10.0, "internationalRelations" to -5.0)),
                     CrisisResponse(2, "Intelligence Operation", "Launch covert intelligence operation",
-                        20000000.0, 0.6, 0.2, mapOf("intelligence" to 50),
+                        20000000.0, 0.6, 0.2, mapOf<String, Int>("intelligence" to 50),
                         mapOf("stability" to 15.0)),
                     CrisisResponse(3, "Negotiation", "Attempt to negotiate with perpetrators",
-                        10000000.0, 0.4, 0.5, mapOf(),
+                        10000000.0, 0.4, 0.5, mapOf<String, Int>(),
                         mapOf("stability" to -20.0, "happiness" to -30.0, "internationalRelations" to -15.0))
                 )
             ),
-            
+
             // Cyber Attacks
             CrisisTemplate(
                 name = "Cyber Warfare Attack",
@@ -448,17 +449,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("infrastructure" to -25.0, "gdp" to -50000000.0, "stability" to -20.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Cyber Counterattack", "Launch cyber counteroffensive",
-                        30000000.0, 0.7, 0.3, mapOf("technology" to 60),
+                        30000000.0, 0.7, 0.3, mapOf<String, Int>("technology" to 60),
                         mapOf("infrastructure" to 15.0, "stability" to 10.0)),
                     CrisisResponse(2, "System Isolation", "Disconnect critical systems",
-                        10000000.0, 0.6, 0.15, mapOf(),
+                        10000000.0, 0.6, 0.15, mapOf<String, Int>(),
                         mapOf("infrastructure" to 10.0, "gdp" to -20000000.0)),
                     CrisisResponse(3, "Public-Private Response", "Coordinate with tech companies",
-                        15000000.0, 0.65, 0.2, mapOf("technology" to 50),
+                        15000000.0, 0.65, 0.2, mapOf<String, Int>("technology" to 50),
                         mapOf("infrastructure" to 12.0, "gdp" to 10000000.0))
                 )
             ),
-            
+
             // Environmental Disasters
             CrisisTemplate(
                 name = "Nuclear Accident",
@@ -467,17 +468,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("environment" to -50.0, "healthcare" to -40.0, "happiness" to -50.0, "population" to -20000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Full Evacuation", "Evacuate entire region",
-                        100000000.0, 0.8, 0.1, mapOf("treasury" to 100000000.0),
+                        100000000.0, 0.8, 0.1, mapOf<String, Int>("treasury" to 100000000),
                         mapOf("healthcare" to 30.0, "happiness" to 20.0)),
                     CrisisResponse(2, "Containment", "Attempt to contain the radiation",
-                        50000000.0, 0.5, 0.4, mapOf("technology" to 70),
+                        50000000.0, 0.5, 0.4, mapOf<String, Int>("technology" to 70),
                         mapOf("environment" to 20.0, "healthcare" to 15.0)),
                     CrisisResponse(3, "International Help", "Request international nuclear response",
-                        20000000.0, 0.7, 0.2, mapOf(),
+                        20000000.0, 0.7, 0.2, mapOf<String, Int>(),
                         mapOf("environment" to 25.0, "internationalRelations" to -10.0))
                 )
             ),
-            
+
             // Social Unrest
             CrisisTemplate(
                 name = "Mass Protests",
@@ -486,17 +487,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("stability" to -30.0, "happiness" to -25.0, "gdp" to -30000000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Concede to Demands", "Accept protester demands",
-                        30000000.0, 0.8, 0.1, mapOf("happiness" to 40),
+                        30000000.0, 0.8, 0.1, mapOf<String, Int>("happiness" to 40),
                         mapOf("happiness" to 25.0, "stability" to 15.0)),
                     CrisisResponse(2, "Police Response", "Deploy police to disperse crowds",
-                        15000000.0, 0.5, 0.4, mapOf("police" to 50),
+                        15000000.0, 0.5, 0.4, mapOf<String, Int>("police" to 50),
                         mapOf("stability" to 10.0, "happiness" to -20.0, "internationalRelations" to -10.0)),
                     CrisisResponse(3, "Dialogue", "Open dialogue with protest leaders",
-                        5000000.0, 0.65, 0.15, mapOf(),
+                        5000000.0, 0.65, 0.15, mapOf<String, Int>(),
                         mapOf("stability" to 15.0, "happiness" to 10.0))
                 )
             ),
-            
+
             // Infrastructure Failures
             CrisisTemplate(
                 name = "Power Grid Failure",
@@ -505,17 +506,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("infrastructure" to -35.0, "gdp" to -80000000.0, "happiness" to -30.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Emergency Power", "Deploy emergency generators",
-                        40000000.0, 0.75, 0.15, mapOf("infrastructure" to 50),
+                        40000000.0, 0.75, 0.15, mapOf<String, Int>("infrastructure" to 50),
                         mapOf("infrastructure" to 20.0, "gdp" to 30000000.0)),
                     CrisisResponse(2, "Regional Grids", "Activate regional backup grids",
-                        20000000.0, 0.6, 0.2, mapOf("infrastructure" to 40),
+                        20000000.0, 0.6, 0.2, mapOf<String, Int>("infrastructure" to 40),
                         mapOf("infrastructure" to 15.0)),
                     CrisisResponse(3, "Rolling Blackouts", "Implement controlled blackouts",
-                        5000000.0, 0.4, 0.3, mapOf(),
+                        5000000.0, 0.4, 0.3, mapOf<String, Int>(),
                         mapOf("gdp" to -40000000.0, "happiness" to -20.0, "infrastructure" to 10.0))
                 )
             ),
-            
+
             // Food Shortage
             CrisisTemplate(
                 name = "Famine",
@@ -524,13 +525,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("happiness" to -50.0, "healthcare" to -30.0, "population" to -100000.0, "stability" to -40.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Food Imports", "Import emergency food supplies",
-                        75000000.0, 0.85, 0.1, mapOf("treasury" to 50000000.0),
+                        75000000.0, 0.85, 0.1, mapOf<String, Int>("treasury" to 50000000),
                         mapOf("happiness" to 30.0, "healthcare" to 20.0, "population" to 50000)),
                     CrisisResponse(2, "Rationing", "Implement strict food rationing",
-                        10000000.0, 0.6, 0.2, mapOf(),
+                        10000000.0, 0.6, 0.2, mapOf<String, Int>(),
                         mapOf("happiness" to -20.0, "stability" to 10.0, "population" to -50000)),
                     CrisisResponse(3, "International Aid", "Request food aid from UN",
-                        5000000.0, 0.7, 0.3, mapOf(),
+                        5000000.0, 0.7, 0.3, mapOf<String, Int>(),
                         mapOf("happiness" to 20.0, "internationalRelations" to -15.0))
                 )
             ),
@@ -543,17 +544,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("gdp" to -100000000.0, "infrastructure" to -20.0, "happiness" to -35.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Emergency Imports", "Import emergency energy supplies",
-                        100000000.0, 0.8, 0.15, mapOf("treasury" to 80000000.0),
+                        100000000.0, 0.8, 0.15, mapOf<String, Int>("treasury" to 80000000),
                         mapOf("gdp" to 50000000.0, "infrastructure" to 15.0)),
                     CrisisResponse(2, "Rationing", "Implement energy rationing",
-                        10000000.0, 0.5, 0.25, mapOf(),
+                        10000000.0, 0.5, 0.25, mapOf<String, Int>(),
                         mapOf("gdp" to -50000000.0, "happiness" to -15.0)),
                     CrisisResponse(3, "Strategic Reserve", "Release strategic petroleum reserve",
-                        30000000.0, 0.7, 0.2, mapOf("infrastructure" to 50),
+                        30000000.0, 0.7, 0.2, mapOf<String, Int>("infrastructure" to 50),
                         mapOf("gdp" to 30000000.0, "infrastructure" to 10.0))
                 )
             ),
-            
+
             // Refugee Crisis
             CrisisTemplate(
                 name = "Refugee Crisis",
@@ -562,17 +563,17 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("treasury" to -50000000.0, "stability" to -20.0, "happiness" to -15.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Open Borders", "Accept all refugees",
-                        100000000.0, 0.7, 0.3, mapOf("treasury" to 100000000.0),
+                        100000000.0, 0.7, 0.3, mapOf<String, Int>("treasury" to 100000000),
                         mapOf("population" to 500000.0, "internationalRelations" to 20.0, "happiness" to -10.0)),
                     CrisisResponse(2, "Processing Centers", "Set up processing centers",
-                        50000000.0, 0.6, 0.2, mapOf("infrastructure" to 50),
+                        50000000.0, 0.6, 0.2, mapOf<String, Int>("infrastructure" to 50),
                         mapOf("internationalRelations" to 5.0, "stability" to -5.0)),
                     CrisisResponse(3, "Closed Borders", "Seal the borders",
-                        20000000.0, 0.5, 0.5, mapOf("military" to 60),
+                        20000000.0, 0.5, 0.5, mapOf<String, Int>("military" to 60),
                         mapOf("internationalRelations" to -30.0, "happiness" to -25.0, "stability" to 10.0))
                 )
             ),
-            
+
             // Civil War
             CrisisTemplate(
                 name = "Civil War",
@@ -581,13 +582,13 @@ object CrisisManager : Serializable {
                 baseEffects = mapOf("stability" to -60.0, "happiness" to -50.0, "gdp" to -200000000.0, "population" to -200000.0),
                 responseOptions = listOf(
                     CrisisResponse(1, "Military Suppression", "Crush the rebellion militarily",
-                        200000000.0, 0.6, 0.5, mapOf("military" to 70),
+                        200000000.0, 0.6, 0.5, mapOf<String, Int>("military" to 70),
                         mapOf("stability" to 30.0, "happiness" to -30.0, "internationalRelations" to -25.0, "population" to -100000.0)),
                     CrisisResponse(2, "Negotiated Settlement", "Negotiate peace agreement",
-                        50000000.0, 0.5, 0.3, mapOf("stability" to 40),
+                        50000000.0, 0.5, 0.3, mapOf<String, Int>("stability" to 40),
                         mapOf("stability" to 20.0, "happiness" to 10.0, "military" to -20.0)),
                     CrisisResponse(3, "Federalization", "Grant autonomy to regions",
-                        30000000.0, 0.45, 0.4, mapOf(),
+                        30000000.0, 0.45, 0.4, mapOf<String, Int>(),
                         mapOf("stability" to 25.0, "happiness" to -10.0, "infrastructure" to -10.0))
                 )
             )

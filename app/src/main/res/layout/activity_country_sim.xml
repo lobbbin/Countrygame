@@ -383,7 +383,35 @@
                     style="?android:attr/buttonBarButtonStyle" />
             </LinearLayout>
 
-            <!-- Row 3: Advancements -->
+            <!-- Row 3: Management -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btnCrisis"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="⚠️ Crisis"
+                    android:textSize="11sp"
+                    android:layout_marginEnd="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+
+                <Button
+                    android:id="@+id/btnIntelligence"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="🕵️ Intel"
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+            </LinearLayout>
+
+            <!-- Row 4: Advancements -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
