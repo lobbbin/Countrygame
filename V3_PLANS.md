@@ -8,12 +8,12 @@
 - [x] Crisis & Emergency Management (15 crisis types, 60+ responses)
 - [x] Intelligence & Espionage (6 agencies, 10 operation types)
 
-### Batch 2: Society & Infrastructure (Planned - 8MB+)
-- [ ] Media & Propaganda System
-- [ ] Crime & Justice System  
-- [ ] Culture & Entertainment System
-- [ ] Transportation & Logistics
-- [ ] Housing & Real Estate
+### Batch 2: Society & Infrastructure (12MB+)
+- [x] Media & Propaganda System
+- [x] Crime & Justice System
+- [x] Culture & Entertainment System
+- [x] Transportation & Logistics
+- [x] Housing & Real Estate
 - [ ] Energy Grid & Power Management
 - [ ] Telecommunications & Internet
 - [ ] Water & Sanitation
@@ -53,11 +53,11 @@
 
 ## 📊 PROGRESS
 
-- **Files Created**: 2
-- **Lines of Code**: 1,174
-- **Estimated Size**: 10MB+
+- **Files Created**: 7
+- **Lines of Code**: ~4000
+- **Estimated Size**: ~15MB
 - **Target Size**: 35MB+
-- **Completion**: ~28%
+- **Completion**: ~43%
 
 ## 🎮 NEW FEATURES SUMMARY
 
@@ -77,26 +77,53 @@
 - Scandal mechanics
 - Intel reports
 
-## 📈 REMAINING TO CREATE
+### Media System
+- News channels (TV, radio, online, print)
+- Propaganda campaigns
+- Press freedom mechanics
+- Censorship system
+- Public trust tracking
 
-Approximately 25 more manager files needed to reach 35MB target.
+### Crime & Justice System
+- 15 crime types
+- Police agencies
+- Justice cases
+- Punishment system
+- Crime statistics
 
-Each manager file averages 500-1000 lines and includes:
-- Data classes
-- Game logic
-- UI integration functions
-- Event handling
+### Culture & Entertainment
+- Cultural institutions
+- Entertainment industries
+- Cultural events
+- Soft power mechanics
 
-## 🚀 NEXT STEPS
+### Transportation
+- Infrastructure management
+- Vehicle fleets
+- Logistics networks
+- Traffic congestion
 
-1. Create remaining society systems
-2. Create economic systems
-3. Create political systems
-4. Create advanced features
-5. Integrate all systems into gameplay
-6. Add UI for all new features
-7. Test and balance
-8. Build and release
+### Housing & Real Estate
+- Property market
+- Real estate development
+- Housing markets by region
+- Public housing
+
+## 🚀 REMAINING TO CREATE
+
+Approximately 20 more manager files needed to reach 35MB target.
+
+## 📈 NEXT STEPS
+
+1. Complete remaining Batch 2 systems (Energy, Telecom, Water, Waste)
+2. Create Batch 3 economic systems
+3. Create Batch 4 political systems
+4. Create Batch 5 advanced features
+5. Create Batch 6 endgame content
+6. Integrate all systems into gameplay
+7. Add UI for all new features
+8. Test and balance
+9. Build and release
 
 ---
 
