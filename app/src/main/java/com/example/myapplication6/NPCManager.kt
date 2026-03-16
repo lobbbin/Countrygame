@@ -183,7 +183,8 @@ enum class ConsequenceType {
     HAPPINESS,
     RELATIONSHIP,
     INFLUENCE,
-    QUEST_LOCK
+    QUEST_LOCK,
+    GDP
 }
 
 /**
@@ -802,6 +803,7 @@ object NPCManager : Serializable {
             ConsequenceType.RELATIONSHIP -> npc.relationship = (npc.relationship + consequence.value).coerceIn(0, 100)
             ConsequenceType.INFLUENCE -> npc.influence = (npc.influence + consequence.value).coerceIn(0, 100)
             ConsequenceType.QUEST_LOCK -> { /* Handle quest lock */ }
+            ConsequenceType.GDP -> country.gdp = (country.gdp + consequence.value.toDouble()).coerceAtLeast(0.0)
         }
     }
 

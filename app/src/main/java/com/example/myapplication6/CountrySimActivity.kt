@@ -241,16 +241,16 @@ class CountrySimActivity : AppCompatActivity() {
 
         // Population growth
         val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
-        country.population = (country.population * (1 + populationGrowthRate)).toLong()
+        country.population = ((country.population * (1 + populationGrowthRate)).toLong()).coerceAtLeast(0)
 
         // Treasury changes
         val taxRevenue = country.gdp * 0.02 // 2% tax per turn
-        
+
         // Apply regional bonuses
         val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
             val bonus = GameWorld.getRegionBonus(region)
-            (bonus["tax"] ?: 1.0 - 1.0) * country.gdp * 0.001
-        }
+            ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
+        }.toLong()
         
         val expenses = country.population * 10 + country.military * 100000 + country.education * 50000
         country.treasury = country.treasury + taxRevenue + regionBonus - expenses
@@ -468,8 +468,8 @@ class CountrySimActivity : AppCompatActivity() {
     private fun showRegionsMenu() {
         val unlockedRegions = GameWorld.getUnlockedRegions()
         val allRegions = GameWorld.getAllRegions()
-        
-        val regionNames = allRegions.map { region ->
+
+        val regionNames: Array<String> = allRegions.map { region ->
             val status = if (region.isUnlocked) {
                 "✓ ${region.name} (Dev: ${region.development}%, Loyalty: ${region.loyalty}%)"
             } else {
@@ -479,7 +479,7 @@ class CountrySimActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle("Regions")
-            .setItems(regionNames) { _, which ->
+            .setItems(regionNames) { _: android.content.DialogInterface, which: Int ->
                 val selectedRegion = allRegions[which]
                 if (selectedRegion.isUnlocked) {
                     showRegionDetail(selectedRegion)
