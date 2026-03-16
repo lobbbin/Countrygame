@@ -28,7 +28,7 @@ val hasValidSigningProps = keystorePropsFile.exists().also { exists ->
 
 android {
     namespace = "com.example.myapplication6"
-    compileSdk = 36
+    compileSdk = 34
     
     // disable linter
     lint {
@@ -48,12 +48,12 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication6"
-        minSdk = 29
-        targetSdk = 36 
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        
-        vectorDrawables { 
+
+        vectorDrawables {
             useSupportLibrary = true
         }
     }
