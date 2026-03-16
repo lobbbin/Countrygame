@@ -57,16 +57,21 @@ class CountrySimActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_country_sim)
+        try {
+            setContentView(R.layout.activity_country_sim)
 
-        initializeViews()
-        setupClickListeners()
+            initializeViews()
+            setupClickListeners()
 
-        // Load saved game or start new game
-        if (savedInstanceState != null) {
-            country = savedInstanceState.getSerializable("country") as Country
-        } else {
-            startNewGame()
+            // Load saved game or start new game
+            if (savedInstanceState != null) {
+                country = savedInstanceState.getSerializable("country") as Country
+            } else {
+                startNewGame()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Crash: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
         }
     }
 
@@ -129,22 +134,26 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun startNewGame() {
-        country = Country()
-        country.name = "Your Nation"
-        country.leaderName = "President"
-        country.capitalCity = "Capital City"
-        country.governmentType = "Democracy"
+        try {
+            country = Country()
+            country.name = "Your Nation"
+            country.leaderName = "President"
+            country.capitalCity = "Capital City"
+            country.governmentType = "Democracy"
 
-        // Initialize game systems
-        NPCManager.initializeNPCs()
-        GameWorld.initializeWorld()
-        EconomyManager.initializeEconomy()
-        PolicyManager.initializePolicySystem()
-        TechnologyManager.initializeTechnology()
-        eventManager = EventManager
+            // Initialize game systems
+            NPCManager.initializeNPCs()
+            GameWorld.initializeWorld()
+            EconomyManager.initializeEconomy()
+            PolicyManager.initializePolicySystem()
+            TechnologyManager.initializeTechnology()
 
-        updateUI()
-        showToast("Welcome, President! Lead your nation to prosperity.")
+            updateUI()
+            showToast("Welcome, President! Lead your nation to prosperity.")
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error starting game: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
     }
 
     private fun updateUI() {
