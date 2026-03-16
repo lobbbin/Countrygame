@@ -9,7 +9,6 @@ import java.text.DecimalFormat
 class CountrySimActivity : AppCompatActivity() {
 
     private lateinit var country: Country
-    private lateinit var eventManager: EventManager
     private var currentEvent: GameEvent? = null
 
     // UI Components - Header
@@ -313,7 +312,7 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun triggerRandomEvent() {
-        currentEvent = eventManager.getRandomEvent()
+        currentEvent = EventManager.getRandomEvent()
         currentEvent?.let { event ->
             txtEventTitle.text = event.title
             txtEventDescription.text = event.description
