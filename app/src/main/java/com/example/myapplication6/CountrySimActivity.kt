@@ -209,98 +209,107 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun nextTurn() {
-        country.turn++
-        country.year++
+        try {
+            country.turn++
+            country.year++
 
-        // Apply passive effects based on stats
-        applyPassiveEffects()
+            // Apply passive effects based on stats
+            applyPassiveEffects()
 
-        // Update game world
-        GameWorld.updateWorldState(country)
-        GameWorld.processActiveEvents(country)
+            // Update game world
+            GameWorld.updateWorldState(country)
+            GameWorld.processActiveEvents(country)
 
-        // Process economic systems
-        EconomyManager.processEconomicTurn(country)
+            // Process economic systems
+            EconomyManager.processEconomicTurn(country)
 
-        // Process policy systems
-        PolicyManager.processMinistryTurn()
-        
-        // Process technology
-        TechnologyManager.processResearchTurn(country)
+            // Process policy systems
+            PolicyManager.processMinistryTurn()
 
-        // Update NPCs
-        NPCManager.updateAllNPCMoods(country)
-        NPCManager.processNPCTurns(country)
-        NPCManager.checkNPCTriggerConditions(country)
+            // Process technology
+            TechnologyManager.processResearchTurn(country)
 
-        // Check for election
-        PolicyManager.nextElectionTurns--
-        if (PolicyManager.nextElectionTurns <= 0) {
-            PolicyManager.processElection(country)
-            showToast("Election held! Government updated.")
-        }
+            // Update NPCs
+            NPCManager.updateAllNPCMoods(country)
+            NPCManager.processNPCTurns(country)
+            NPCManager.checkNPCTriggerConditions(country)
 
-        // Check for game over
-        if (country.isGameOver()) {
-            updateUI()
-            return
-        }
-
-        // Trigger random event (70% chance)
-        if (Math.random() < 0.7) {
-            triggerRandomEvent()
-        } else {
-            layoutEvent.visibility = android.view.View.GONE
-            layoutActions.visibility = android.view.View.VISIBLE
-            
-            // Show NPC advice occasionally
-            if (Math.random() < 0.3) {
-                showRandomNPCAdvice()
+            // Check for election
+            PolicyManager.nextElectionTurns--
+            if (PolicyManager.nextElectionTurns <= 0) {
+                PolicyManager.processElection(country)
+                showToast("Election held! Government updated.")
             }
-        }
 
-        updateUI()
+            // Check for game over
+            if (country.isGameOver()) {
+                updateUI()
+                return
+            }
+
+            // Trigger random event (70% chance)
+            if (Math.random() < 0.7) {
+                triggerRandomEvent()
+            } else {
+                layoutEvent.visibility = android.view.View.GONE
+                layoutActions.visibility = android.view.View.VISIBLE
+
+                // Show NPC advice occasionally
+                if (Math.random() < 0.3) {
+                    showRandomNPCAdvice()
+                }
+            }
+
+            updateUI()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Next Turn Error: ${e.message}\n${e.stackTraceToString()}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
     }
 
     private fun applyPassiveEffects() {
-        // GDP growth based on various factors
-        val gdpGrowthRate = ((country.education + country.infrastructure + country.stability) / 300.0) - 0.05
+        try {
+            // GDP growth based on various factors
+            val gdpGrowthRate = ((country.education + country.infrastructure + country.stability) / 300.0) - 0.05
 
-        // Apply global economy modifier
-        val economyModifier = when (GameWorld.globalEconomyState) {
-            EconomyState.BOOMING -> 1.1
-            EconomyState.STABLE -> 1.0
-            EconomyState.SLOWING -> 0.95
-            EconomyState.RECESSION -> 0.9
+            // Apply global economy modifier
+            val economyModifier = when (GameWorld.globalEconomyState) {
+                EconomyState.BOOMING -> 1.1
+                EconomyState.STABLE -> 1.0
+                EconomyState.SLOWING -> 0.95
+                EconomyState.RECESSION -> 0.9
+            }
+
+            country.gdp = country.gdp * (1 + gdpGrowthRate) * economyModifier
+
+            // Population growth
+            val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
+            country.population = ((country.population * (1 + populationGrowthRate)).toInt()).coerceAtLeast(1000)
+
+            // Treasury changes
+            val taxRevenue = country.gdp * 0.02 // 2% tax per turn
+
+            // Apply regional bonuses
+            val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
+                val bonus = GameWorld.getRegionBonus(region)
+                ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
+            }
+
+            val expenses = (country.population * 10.0) + (country.military * 100000.0) + (country.education * 50000.0)
+            country.treasury = country.treasury + taxRevenue + regionBonus - expenses
+
+            // Clamp values
+            country.stability = country.stability.coerceIn(0, 100)
+            country.happiness = country.happiness.coerceIn(0, 100)
+            country.military = country.military.coerceIn(0, 100)
+            country.internationalRelations = country.internationalRelations.coerceIn(0, 100)
+            country.education = country.education.coerceIn(0, 100)
+            country.healthcare = country.healthcare.coerceIn(0, 100)
+            country.infrastructure = country.infrastructure.coerceIn(0, 100)
+            country.environment = country.environment.coerceIn(0, 100)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        country.gdp = country.gdp * (1 + gdpGrowthRate) * economyModifier
-
-        // Population growth
-        val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
-        country.population = (country.population * (1 + populationGrowthRate)).toInt()
-
-        // Treasury changes
-        val taxRevenue = country.gdp * 0.02 // 2% tax per turn
-
-        // Apply regional bonuses
-        val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
-            val bonus = GameWorld.getRegionBonus(region)
-            ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
-        }
-
-        val expenses = country.population * 10 + country.military * 100000 + country.education * 50000
-        country.treasury = country.treasury + taxRevenue + regionBonus - expenses
-
-        // Clamp values
-        country.stability = country.stability.coerceIn(0, 100)
-        country.happiness = country.happiness.coerceIn(0, 100)
-        country.military = country.military.coerceIn(0, 100)
-        country.internationalRelations = country.internationalRelations.coerceIn(0, 100)
-        country.education = country.education.coerceIn(0, 100)
-        country.healthcare = country.healthcare.coerceIn(0, 100)
-        country.infrastructure = country.infrastructure.coerceIn(0, 100)
-        country.environment = country.environment.coerceIn(0, 100)
     }
 
     private fun triggerRandomEvent() {
