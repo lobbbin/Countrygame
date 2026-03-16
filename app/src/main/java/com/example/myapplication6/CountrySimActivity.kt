@@ -44,6 +44,9 @@ class CountrySimActivity : AppCompatActivity() {
     private lateinit var btnNPCs: Button
     private lateinit var btnWorldStatus: Button
     private lateinit var btnRegions: Button
+    private lateinit var btnEconomy: Button
+    private lateinit var btnPolicies: Button
+    private lateinit var btnTechnology: Button
 
     private lateinit var layoutEvent: LinearLayout
     private lateinit var layoutStats: ScrollView
@@ -102,6 +105,9 @@ class CountrySimActivity : AppCompatActivity() {
         btnNPCs = findViewById(R.id.btnNPCs)
         btnWorldStatus = findViewById(R.id.btnWorldStatus)
         btnRegions = findViewById(R.id.btnRegions)
+        btnEconomy = findViewById(R.id.btnEconomy)
+        btnPolicies = findViewById(R.id.btnPolicies)
+        btnTechnology = findViewById(R.id.btnTechnology)
 
         layoutEvent = findViewById(R.id.layoutEvent)
         layoutStats = findViewById(R.id.layoutStats)
@@ -117,6 +123,9 @@ class CountrySimActivity : AppCompatActivity() {
         btnNPCs.setOnClickListener { showNPCMenu() }
         btnWorldStatus.setOnClickListener { showWorldStatus() }
         btnRegions.setOnClickListener { showRegionsMenu() }
+        btnEconomy.setOnClickListener { showEconomyMenu() }
+        btnPolicies.setOnClickListener { showPoliciesMenu() }
+        btnTechnology.setOnClickListener { showTechnologyMenu() }
     }
 
     private fun startNewGame() {
@@ -129,6 +138,9 @@ class CountrySimActivity : AppCompatActivity() {
         // Initialize game systems
         NPCManager.initializeNPCs()
         GameWorld.initializeWorld()
+        EconomyManager.initializeEconomy()
+        PolicyManager.initializePolicySystem()
+        TechnologyManager.initializeTechnology()
         eventManager = EventManager
 
         updateUI()
@@ -198,10 +210,26 @@ class CountrySimActivity : AppCompatActivity() {
         GameWorld.updateWorldState(country)
         GameWorld.processActiveEvents(country)
 
+        // Process economic systems
+        EconomyManager.processEconomicTurn(country)
+
+        // Process policy systems
+        PolicyManager.processMinistryTurn()
+        
+        // Process technology
+        TechnologyManager.processResearchTurn(country)
+
         // Update NPCs
         NPCManager.updateAllNPCMoods(country)
         NPCManager.processNPCTurns(country)
         NPCManager.checkNPCTriggerConditions(country)
+
+        // Check for election
+        PolicyManager.nextElectionTurns--
+        if (PolicyManager.nextElectionTurns <= 0) {
+            PolicyManager.processElection(country)
+            showToast("Election held! Government updated.")
+        }
 
         // Check for game over
         if (country.isGameOver()) {
@@ -575,6 +603,485 @@ class CountrySimActivity : AppCompatActivity() {
                 startNewGame()
             }
             .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun showEconomyMenu() {
+        val items = arrayOf(
+            "Economic Summary",
+            "Manage Industries",
+            "Economic Policies",
+            "Budget Allocation",
+            "Trade & Resources",
+            "Market Conditions"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("Economy Management")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showEconomicSummary()
+                    1 -> showIndustriesMenu()
+                    2 -> showEconomicPoliciesMenu()
+                    3 -> showBudgetMenu()
+                    4 -> showTradeMenu()
+                    5 -> showMarketConditionsMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showEconomicSummary() {
+        val summary = EconomyManager.getEconomicSummary(country)
+        AlertDialog.Builder(this)
+            .setTitle("Economic Summary")
+            .setMessage(summary)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showIndustriesMenu() {
+        val industryNames = EconomyManager.industries.map { ind ->
+            "${ind.name} (Lvl ${ind.level}) - ${ind.sector}\nEfficiency: ${(ind.efficiency * 100).toInt()}%, Employees: ${ind.employees}/${ind.employmentCapacity * ind.level}"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Industries")
+            .setItems(industryNames) { _, which ->
+                val industry = EconomyManager.industries[which]
+                val upgradeCost = industry.baseOutput * industry.level * 0.1
+                AlertDialog.Builder(this)
+                    .setTitle(industry.name)
+                    .setMessage("${industry.description}\n\nSector: ${industry.sector}\nLevel: ${industry.level}\nEfficiency: ${(industry.efficiency * 100).toInt()}%\nEmployees: ${industry.employees}\nOutput: $${String.format("%,d", (industry.baseOutput * industry.level * industry.efficiency).toLong())}\n\nUpgrade Cost: $${String.format("%,d", upgradeCost.toLong())}")
+                    .setPositiveButton("Upgrade") { _, _ ->
+                        if (country.treasury >= upgradeCost) {
+                            country.treasury -= upgradeCost
+                            industry.level++
+                            industry.efficiency = (industry.efficiency + 0.1).coerceIn(0.5, 2.0)
+                            showToast("${industry.name} upgraded to level ${industry.level}!")
+                        } else {
+                            showToast("Not enough treasury!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showEconomicPoliciesMenu() {
+        val policies = EconomyManager.getAvailablePolicies()
+        val policyNames = policies.map { p ->
+            "${p.name} (${p.policyType})\nCost: $${String.format("%,d", p.cost.toLong())} | Duration: ${p.duration} turns"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Economic Policies")
+            .setItems(policyNames) { _, which ->
+                val policy = policies[which]
+                var message = "${policy.name}\n\n${policy.description}\n\n"
+                message += "Type: ${policy.policyType}\n"
+                message += "Cost: $${String.format("%,d", policy.cost.toLong())}\n"
+                message += "Duration: ${policy.duration} turns\n\n"
+                message += "Effects:\n"
+                policy.effects.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                if (policy.requirements.isNotEmpty()) {
+                    message += "\nRequirements:\n"
+                    policy.requirements.forEach { (req, value) ->
+                        message += "- $req: $value\n"
+                    }
+                }
+                
+                val isActive = EconomyManager.activePolicies.any { it.id == policy.id && it.isActive }
+                
+                AlertDialog.Builder(this)
+                    .setTitle("Policy Details")
+                    .setMessage(message.toString())
+                    .setPositiveButton(if (isActive) "Already Active" else "Activate") { _, _ ->
+                        if (!isActive && EconomyManager.activatePolicy(policy, country)) {
+                            showToast("Policy '${policy.name}' activated!")
+                        } else if (!isActive) {
+                            showToast("Cannot activate policy - requirements not met!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showBudgetMenu() {
+        val budget = EconomyManager.budget
+        val message = StringBuilder()
+        message.append("=== BUDGET ALLOCATION ===\n\n")
+        message.append("Total: ${budget.getTotal()}% / 100%\n\n")
+        message.append("Defense: ${budget.defense}%\n")
+        message.append("Education: ${budget.education}%\n")
+        message.append("Healthcare: ${budget.healthcare}%\n")
+        message.append("Infrastructure: ${budget.infrastructure}%\n")
+        message.append("Social Welfare: ${budget.socialWelfare}%\n")
+        message.append("Research: ${budget.research}%\n")
+        message.append("Environment: ${budget.environment}%\n")
+        message.append("Debt Service: ${budget.debtService}%\n")
+        message.append("Other: ${budget.getTotal() - budget.defense - budget.education - budget.healthcare - budget.infrastructure - budget.socialWelfare - budget.research - budget.environment - budget.debtService}%\n")
+        
+        AlertDialog.Builder(this)
+            .setTitle("Budget Allocation")
+            .setMessage(message.toString())
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showTradeMenu() {
+        val resources = EconomyManager.resources
+        val resourceInfo = resources.map { r ->
+            "${r.name}: ${r.currentPrice.toString().take(6)} | Stock: ${r.stockpile.toString().takeBefore('.')}\nProd: ${r.production}/Cons: ${r.consumption} | Import: ${r.importAmount}/Export: ${r.exportAmount}"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Resources & Trade")
+            .setItems(resourceInfo) { _, which ->
+                val resource = resources[which]
+                val message = "${resource.name}\n\nType: ${resource.type}\nPrice: $${resource.currentPrice}\nStockpile: ${resource.stockpile}\nProduction: ${resource.production}\nConsumption: ${resource.consumption}\nImports: ${resource.importAmount}\nExports: ${resource.exportAmount}\n\nTrade Balance: $${String.format("%,d", ((resource.exportAmount - resource.importAmount) * resource.currentPrice).toLong())}"
+                AlertDialog.Builder(this)
+                    .setTitle(resource.name)
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showMarketConditionsMenu() {
+        val conditions = EconomyManager.marketConditions
+        if (conditions.isEmpty()) {
+            showToast("No active market conditions. Economy is stable.")
+            return
+        }
+        
+        val conditionInfo = conditions.map { c ->
+            "${c.conditionType} (Severity: ${c.severity}) - ${c.turnsRemaining} turns remaining"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Market Conditions")
+            .setItems(conditionInfo) { _, which ->
+                val condition = conditions[which]
+                var message = "${condition.conditionType}\n\nSeverity: ${condition.severity}\nTurns Remaining: ${condition.turnsRemaining}\n\nEffects:\n"
+                condition.effects.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                AlertDialog.Builder(this)
+                    .setTitle(condition.conditionType.toString())
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showPoliciesMenu() {
+        val items = arrayOf(
+            "Political Summary",
+            "Propose New Law",
+            "Active Laws",
+            "Government Ministries",
+            "Lobby Groups",
+            "Opinion Polls"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("Policy & Government")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showPoliticalSummary()
+                    1 -> showProposeLawMenu()
+                    2 -> showActiveLawsMenu()
+                    3 -> showMinistriesMenu()
+                    4 -> showLobbyGroupsMenu()
+                    5 -> showOpinionPollsMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showPoliticalSummary() {
+        val summary = PolicyManager.getPoliticalSummary()
+        AlertDialog.Builder(this)
+            .setTitle("Political Summary")
+            .setMessage(summary)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showProposeLawMenu() {
+        val laws = PolicyManager.getAvailableLaws()
+        val lawNames = laws.map { l -> "${l.name} (${l.lawType})\nCost: $${String.format("%,d", l.cost.toLong())}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Propose New Law")
+            .setItems(lawNames) { _, which ->
+                val law = laws[which]
+                var message = "${law.name}\n\n${law.description}\n\n"
+                message += "Type: ${law.lawType}\n"
+                message += "Cost: $${String.format("%,d", law.cost.toLong())}\n"
+                message += "Support Required: ${law.supportRequired}%\n\n"
+                message += "Effects:\n"
+                law.effects.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                
+                AlertDialog.Builder(this)
+                    .setTitle("Law Details")
+                    .setMessage(message.toString())
+                    .setPositiveButton("Propose") { _, _ ->
+                        if (PolicyManager.proposeLaw(law, country)) {
+                            law.status = LawStatus.IN_COMMITTEE
+                            showToast("Law '${law.name}' proposed!")
+                        } else {
+                            showToast("Cannot propose law - insufficient funds!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showActiveLawsMenu() {
+        val activeLaws = PolicyManager.laws.filter { it.status == LawStatus.ACTIVE }
+        if (activeLaws.isEmpty()) {
+            showToast("No active laws.")
+            return
+        }
+        
+        val lawInfo = activeLaws.map { l -> "${l.name} - ${l.lawType}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Active Laws")
+            .setItems(lawInfo) { _, which ->
+                val law = activeLaws[which]
+                AlertDialog.Builder(this)
+                    .setTitle(law.name)
+                    .setMessage("${law.description}\n\nType: ${law.lawType}\nProposed by: ${law.proposer}")
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showMinistriesMenu() {
+        val ministryNames = PolicyManager.ministries.map { m -> "${m.name}\nEfficiency: ${m.efficiency.toInt()}% | Budget: $${String.format("%,d", (m.budget / 1000000).toLong())}M | Projects: ${m.projects.size}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Government Ministries")
+            .setItems(ministryNames) { _, which ->
+                val ministry = PolicyManager.ministries[which]
+                var message = "${ministry.name}\n\n${ministry.description}\n\n"
+                message += "Minister: ${ministry.minister.name}\n"
+                message += "Efficiency: ${ministry.efficiency.toInt()}%\n"
+                message += "Budget: $${String.format("%,d", ministry.budget.toLong())}\n"
+                message += "Employees: ${ministry.employees}\n"
+                if (ministry.projects.isNotEmpty()) {
+                    message += "\nActive Projects:\n"
+                    ministry.projects.forEach { p ->
+                        message += "- ${p.name} (${p.progress}/${p.duration})\n"
+                    }
+                }
+                AlertDialog.Builder(this)
+                    .setTitle(ministry.name)
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showLobbyGroupsMenu() {
+        val lobbyNames = PolicyManager.lobbyGroups.map { l -> "${l.name} (${l.interest})\nInfluence: ${l.influence.toInt()}%" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Lobby Groups")
+            .setItems(lobbyNames) { _, which ->
+                val lobby = PolicyManager.lobbyGroups[which]
+                val message = "${lobby.name}\n\nInterest: ${lobby.interest}\nBudget: $${String.format("%,d", lobby.budget.toLong())}\nInfluence: ${lobby.influence.toInt()}%\n\nAllied Parties: ${lobby.alliedParties.joinToString()}\nOpposed Parties: ${lobby.opposedParties.joinToString()}"
+                AlertDialog.Builder(this)
+                    .setTitle(lobby.name)
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showOpinionPollsMenu() {
+        val ratings = PolicyManager.approvalRatings
+        val message = "=== APPROVAL RATINGS ===\n\n" +
+            "President: ${ratings.presidentApproval.toInt()}%\n" +
+            "Congress: ${ratings.congressApproval.toInt()}%\n" +
+            "Supreme Court: ${ratings.supremeCourtApproval.toInt()}%\n" +
+            "Media: ${ratings.mediaApproval.toInt()}%\n" +
+            "International: ${ratings.internationalApproval.toInt()}%"
+        
+        AlertDialog.Builder(this)
+            .setTitle("Opinion Polls")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showTechnologyMenu() {
+        val items = arrayOf(
+            "Technology Summary",
+            "Research Technologies",
+            "Research Projects",
+            "Research Facilities"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("Technology & Research")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showTechnologySummary()
+                    1 -> showResearchTechnologiesMenu()
+                    2 -> showResearchProjectsMenu()
+                    3 -> showResearchFacilitiesMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showTechnologySummary() {
+        val summary = TechnologyManager.getTechnologySummary()
+        AlertDialog.Builder(this)
+            .setTitle("Technology Summary")
+            .setMessage(summary)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showResearchTechnologiesMenu() {
+        val techs = TechnologyManager.getResearchableTechnologies()
+        if (techs.isEmpty()) {
+            showToast("No technologies available to research. Complete prerequisites first.")
+            return
+        }
+        
+        val techNames = techs.map { t -> "${t.name} (Tier ${t.tier.name.replace("TIER_", "")})\nCost: $${t.researchCost}M | ${t.category}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Research Technologies")
+            .setItems(techNames) { _, which ->
+                val tech = techs[which]
+                var message = "${tech.name}\n\n${tech.description}\n\n"
+                message += "Category: ${tech.category}\n"
+                message += "Tier: ${tech.tier}\n"
+                message += "Research Cost: $${tech.researchCost}M\n"
+                message += "Progress: ${tech.researchProgress}/${tech.researchCost * 10}\n\n"
+                message += "Effects:\n"
+                tech.effects.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                if (tech.unlockFeatures.isNotEmpty()) {
+                    message += "\nUnlocks: ${tech.unlockFeatures.joinToString()}"
+                }
+                
+                AlertDialog.Builder(this)
+                    .setTitle("Technology Details")
+                    .setMessage(message.toString())
+                    .setPositiveButton("Start Research") { _, _ ->
+                        if (TechnologyManager.startResearch(tech.id, country)) {
+                            showToast("Research started: ${tech.name}")
+                        } else {
+                            showToast("Cannot start research - insufficient funds or prerequisites!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showResearchProjectsMenu() {
+        val projects = TechnologyManager.getAvailableProjects()
+        val projectNames = projects.map { p -> "${p.name}\nCost: $${String.format("%,d", (p.cost / 1000000).toLong())}M | ${p.duration} turns" }.toTypedArray()
+        
+ AlertDialog.Builder(this)
+            .setTitle("Research Projects")
+            .setItems(projectNames) { _, which ->
+                val project = projects[which]
+                var message = "${project.name}\n\n${project.description}\n\n"
+                message += "Cost: $${String.format("%,d", project.cost.toLong())}\n"
+                message += "Duration: ${project.duration} turns\n\n"
+                message += "Requirements:\n"
+                project.requirements.forEach { (req, value) ->
+                    message += "- $req: $value\n"
+                }
+                message += "\nRewards:\n"
+                project.rewards.forEach { (stat, value) ->
+                    message += "- $stat: $value\n"
+                }
+                
+                AlertDialog.Builder(this)
+                    .setTitle("Project Details")
+                    .setMessage(message.toString())
+                    .setPositiveButton("Fund Project") { _, _ ->
+                        if (TechnologyManager.startResearchProject(project, country)) {
+                            showToast("Project '${project.name}' funded!")
+                        } else {
+                            showToast("Cannot fund project - requirements not met!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showResearchFacilitiesMenu() {
+        val facilityNames = TechnologyManager.facilities.map { f -> "${f.name} (Lvl ${f.level})\nEfficiency: ${(f.efficiency * 100).toInt()}% | Capacity: ${f.capacity}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Research Facilities")
+            .setItems(facilityNames) { _, which ->
+                val facility = TechnologyManager.facilities[which]
+                val upgradeCost = facility.maintenanceCost * 10 * facility.level
+                var message = "${facility.name}\n\nType: ${facility.type}\nLevel: ${facility.level}\n"
+                message += "Capacity: ${facility.capacity}\n"
+                message += "Efficiency: ${(facility.efficiency * 100).toInt()}%\n"
+                message += "Current Projects: ${facility.currentProjects}/${facility.maxProjects}\n"
+                message += "Maintenance: $${String.format("%,d", (facility.maintenanceCost / 1000000).toLong())}M/year\n\n"
+                message += "Upgrade Cost: $${String.format("%,d", (upgradeCost / 1000000).toLong())}M"
+                
+                AlertDialog.Builder(this)
+                    .setTitle(facility.name)
+                    .setMessage(message)
+                    .setPositiveButton("Upgrade") { _, _ ->
+                        if (TechnologyManager.upgradeFacility(facility.id, country)) {
+                            showToast("${facility.name} upgraded to level ${facility.level}!")
+                        } else {
+                            showToast("Cannot upgrade - insufficient funds!")
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .setNegativeButton("Close", null)
             .show()
     }
 
