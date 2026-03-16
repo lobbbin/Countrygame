@@ -269,7 +269,7 @@ class CountrySimActivity : AppCompatActivity() {
 
         // Population growth
         val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
-        country.population = ((country.population * (1 + populationGrowthRate)).toLong()).coerceAtLeast(0L)
+        country.population = (country.population * (1 + populationGrowthRate)).toLong()
 
         // Treasury changes
         val taxRevenue = country.gdp * 0.02 // 2% tax per turn
@@ -278,9 +278,9 @@ class CountrySimActivity : AppCompatActivity() {
         val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
             val bonus = GameWorld.getRegionBonus(region)
             ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
-        }
+        }.toLong()
 
-        val expenses = country.population * 10 + country.military * 100000 + country.education * 50000
+        val expenses = (country.population * 10L + country.military * 100000L + country.education * 50000L).toInt()
         country.treasury = country.treasury + taxRevenue + regionBonus - expenses
 
         // Clamp values
@@ -525,6 +525,7 @@ class CountrySimActivity : AppCompatActivity() {
                         3 -> message += "- Infrastructure: 40%+ (Current: ${country.infrastructure}%)\n- Treasury: $50M+ (Current: ${currencyFormat.format(country.treasury)})"
                         4 -> message += "- Military: 50%+ (Current: ${country.military}%)\n- Stability: 50%+ (Current: ${country.stability}%)"
                         5 -> message += "- Military: 60%+ (Current: ${country.military}%)\n- Int'l Relations: 40%+ (Current: ${country.internationalRelations}%)"
+                        else -> message += "- Meeting specific requirements"
                     }
                     
                     if (canUnlock) {

@@ -30,6 +30,7 @@ data class Industry(
     val employmentCapacity: Int,
     val taxRate: Double,
     val environmentalImpact: Int,
+    val description: String = "Industrial facility",
     var level: Int = 1,
     var efficiency: Double = 1.0,
     var employees: Int = 0,
@@ -175,7 +176,7 @@ enum class ZoneType {
 data class MarketCondition(
     val conditionType: MarketConditionType,
     val severity: Int,
-    val turnsRemaining: Int,
+    var turnsRemaining: Int,
     val effects: Map<String, Double>
 ) : Serializable
 
@@ -404,6 +405,10 @@ object EconomyManager : Serializable {
             "infrastructure" -> country.infrastructure >= value.toInt()
             "interestRate" -> indicators.interestRate >= value
             "inflation" -> indicators.inflationRate >= value
+            "military" -> country.military >= value.toInt()
+            "internationalRelations" -> country.internationalRelations >= value.toInt()
+            "healthcare" -> country.healthcare >= value.toInt()
+            "unemployment" -> indicators.unemploymentRate <= value
             else -> false
         }
     }

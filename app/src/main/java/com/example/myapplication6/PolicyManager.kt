@@ -116,9 +116,9 @@ data class Law(
     val duration: Int,
     var status: LawStatus = LawStatus.PROPOSED,
     val supportRequired: Double = 50.0,
-    val controversy: Double = 50.0,
-    val lobbySupport: Double = 0.0,
-    val lobbyOpposition: Double = 0.0,
+    var controversy: Double = 50.0,
+    var lobbySupport: Double = 0.0,
+    var lobbyOpposition: Double = 0.0,
     var turnsInCommittee: Int = 0,
     var turnsInParliament: Int = 0
 ) : Serializable
@@ -363,7 +363,14 @@ object PolicyManager : Serializable {
             role = NPCRole.ADVISOR,
             description = "Government official",
             relationship = 50,
-            influence = 50
+            influence = 50,
+            personality = Personality(
+                trait1 = PersonalityTrait.PRAGMATIC,
+                trait2 = PersonalityTrait.HONEST,
+                motivation = "Serve the nation",
+                fear = "Failure",
+                values = listOf("Duty", "Service")
+            )
         )
     }
     

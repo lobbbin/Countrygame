@@ -67,12 +67,12 @@ data class ResearchFacility(
     val id: Int,
     val name: String,
     val type: FacilityType,
-    val level: Int,
-    val capacity: Int,
-    val efficiency: Double,
+    var level: Int,
+    var capacity: Int,
+    var efficiency: Double,
     val currentProjects: Int,
     val maxProjects: Int,
-    val maintenanceCost: Double
+    var maintenanceCost: Double
 ) : Serializable
 
 enum class FacilityType {
