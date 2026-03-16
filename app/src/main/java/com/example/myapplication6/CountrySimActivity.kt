@@ -505,13 +505,214 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun showWorldStatus() {
-        val report = GameWorld.getWorldStatusReport(country)
+        val items = arrayOf(
+            "World Report",
+            "Factions",
+            "Diplomatic Relations",
+            "Threat Level & Security"
+        )
         
         AlertDialog.Builder(this)
-            .setTitle("World Status Report")
+            .setTitle("World Management")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showWorldReport()
+                    1 -> showFactionsMenu()
+                    2 -> showDiplomacyMenu()
+                    3 -> showThreatLevelMenu()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showWorldReport() {
+        val report = GameWorld.getWorldStatusReport(country)
+        AlertDialog.Builder(this)
+            .setTitle("World Report")
             .setMessage(report)
             .setPositiveButton("OK", null)
             .show()
+    }
+
+    private fun showFactionsMenu() {
+        val factions = PolicyManager.getAllFactions()
+        val factionNames = factions.map { f -> 
+            "${f.name} (${f.ideology})\nPower: ${f.power}% | ${if (f.isLegal) "Legal" else "Illegal"}" 
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Political Factions")
+            .setItems(factionNames) { _, which ->
+                val faction = factions[which]
+                var message = "${faction.name}\n\n"
+                message += "${faction.description}\n\n"
+                message += "Ideology: ${faction.ideology}\n"
+                message += "Leader: ${faction.leader}\n"
+                message += "Power: ${faction.power}%\n"
+                message += "Status: ${if (faction.isLegal) "✓ Legal" else "⚠ Illegal"}\n\n"
+                message += "Goals:\n"
+                faction.goals.forEach { goal ->
+                    message += "- $goal\n"
+                }
+                
+                AlertDialog.Builder(this)
+                    .setTitle(faction.name)
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .setNeutralButton(if (faction.isLegal) "Ban Faction" else "Legalize Faction") { _, _ ->
+                        toggleFactionLegality(faction)
+                    }
+                    .show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun toggleFactionLegality(faction: PolicyManager.Faction) {
+        if (faction.isLegal) {
+            // Ban faction
+            faction.isLegal = false
+            faction.power = (faction.power - 10).coerceAtLeast(0)
+            country.stability = (country.stability + 5).coerceIn(0, 100)
+            country.happiness = (country.happiness - 5).coerceIn(0, 100)
+            showToast("${faction.name} banned! Stability +5, Happiness -5")
+        } else {
+            // Legalize faction
+            faction.isLegal = true
+            country.stability = (country.stability - 5).coerceIn(0, 100)
+            country.happiness = (country.happiness + 5).coerceIn(0, 100)
+            showToast("${faction.name} legalized! Stability -5, Happiness +5")
+        }
+    }
+
+    private fun showDiplomacyMenu() {
+        val relations = GameWorld.diplomaticRelations
+        val nationIds = relations.keys.sorted()
+        val nationNames = nationIds.map { id ->
+            "${GameWorld.getNationName(id)}: ${relations[id]}%"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Diplomatic Relations")
+            .setItems(nationNames) { _, which ->
+                val nationId = nationIds[which]
+                val relation = relations[nationId] ?: 50
+                showDiplomacyOptions(nationId, relation)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showDiplomacyOptions(nationId: Int, currentRelation: Int) {
+        val nationName = GameWorld.getNationName(nationId)
+        val relationStatus = when {
+            currentRelation >= 80 -> "Ally"
+            currentRelation >= 60 -> "Friendly"
+            currentRelation >= 40 -> "Neutral"
+            currentRelation >= 20 -> "Tense"
+            else -> "Hostile"
+        }
+        
+        val options = arrayOf(
+            "Send Aid (-$10M, +10 Relations)",
+            "Trade Deal (-$5M, +5 Relations, +$20M GDP)",
+            "Military Exercise (-$15M, +5 Military, -5 Relations)",
+            "Cancel"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("$nationName ($relationStatus - $currentRelation%)")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> sendForeignAid(nationId)
+                    1 -> proposeTradeDeal(nationId)
+                    2 -> conductMilitaryExercise(nationId)
+                    3 -> {} // Cancel
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun sendForeignAid(nationId: Int) {
+        if (country.treasury >= 10000000) {
+            country.treasury -= 10000000
+            GameWorld.setDiplomaticRelation(nationId, GameWorld.getDiplomaticRelation(nationId) + 10)
+            showToast("Foreign aid sent! Relations improved.")
+        } else {
+            showToast("Not enough treasury! Need $10M")
+        }
+    }
+
+    private fun proposeTradeDeal(nationId: Int) {
+        if (country.treasury >= 5000000) {
+            country.treasury -= 5000000
+            country.gdp = (country.gdp + 20000000).coerceAtLeast(0.0)
+            GameWorld.setDiplomaticRelation(nationId, GameWorld.getDiplomaticRelation(nationId) + 5)
+            showToast("Trade deal signed! GDP +$20M, Relations +5")
+        } else {
+            showToast("Not enough treasury! Need $5M")
+        }
+    }
+
+    private fun conductMilitaryExercise(nationId: Int) {
+        if (country.treasury >= 15000000) {
+            country.treasury -= 15000000
+            country.military = (country.military + 5).coerceIn(0, 100)
+            GameWorld.setDiplomaticRelation(nationId, GameWorld.getDiplomaticRelation(nationId) - 5)
+            showToast("Military exercise conducted! Military +5, Relations -5")
+        } else {
+            showToast("Not enough treasury! Need $15M")
+        }
+    }
+
+    private fun showThreatLevelMenu() {
+        var message = "=== NATIONAL SECURITY ===\n\n"
+        message += "Threat Level: ${GameWorld.currentThreatLevel}\n"
+        message += "${GameWorld.getThreatLevelDescription()}\n\n"
+        message += "World Tension: ${GameWorld.worldTension}%\n"
+        message += "Global Economy: ${GameWorld.globalEconomyState}\n\n"
+        message += "Active Crises: ${GameWorld.activeCrises}\n"
+        
+        val activeEvents = GameWorld.getActiveEvents()
+        if (activeEvents.isNotEmpty()) {
+            message += "\nActive Events:\n"
+            activeEvents.forEach { event ->
+                message += "- ${event.title} (${event.turnsRemaining} turns)\n"
+            }
+        } else {
+            message += "\nNo active crises.\n"
+        }
+        
+        message += "\n=== RECOMMENDATIONS ===\n"
+        when (GameWorld.currentThreatLevel) {
+            GameWorld.ThreatLevel.LOW -> message += "• Maintain current policies\n• Focus on economic growth"
+            GameWorld.ThreatLevel.MEDIUM -> message += "• Monitor situation closely\n• Consider military investment"
+            GameWorld.ThreatLevel.HIGH -> message += "• Increase military readiness\n• Seek international alliances\n• Prepare emergency measures"
+            GameWorld.ThreatLevel.CRITICAL -> message += "• EMERGENCY: Consider emergency powers\n• Mobilize military\n• Seek immediate international support"
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("National Security")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Increase Security") { _, _ ->
+                increaseSecurityMeasures()
+            }
+            .show()
+    }
+
+    private fun increaseSecurityMeasures() {
+        if (country.treasury >= 20000000) {
+            country.treasury -= 20000000
+            country.military = (country.military + 10).coerceIn(0, 100)
+            country.stability = (country.stability + 5).coerceIn(0, 100)
+            GameWorld.worldTension = (GameWorld.worldTension - 5).coerceIn(0, 100)
+            showToast("Security measures increased! Military +10, Stability +5")
+        } else {
+            showToast("Not enough treasury! Need $20M")
+        }
     }
 
     private fun showRegionsMenu() {
@@ -594,7 +795,161 @@ class CountrySimActivity : AppCompatActivity() {
             .setTitle("Region Details")
             .setMessage(message.toString())
             .setPositiveButton("OK", null)
+            .setNeutralButton("Invest ($10M)") { _, _ ->
+                investInRegion(region)
+            }
+            .setNegativeButton("Special Action") { _, _ ->
+                performRegionAction(region)
+            }
             .show()
+    }
+
+    private fun investInRegion(region: Region) {
+        if (country.treasury >= 10000000) {
+            country.treasury -= 10000000
+            region.development = (region.development + 5).coerceIn(0, 100)
+            region.loyalty = (region.loyalty + 3).coerceIn(0, 100)
+            country.gdp = (country.gdp + 5000000).coerceAtLeast(0.0)
+            showToast("${region.name} developed! Development +5, Loyalty +3")
+        } else {
+            showToast("Not enough treasury! Need $10M")
+        }
+    }
+
+    private fun performRegionAction(region: Region) {
+        val actions = when (region.id) {
+            0 -> arrayOf("Capital Investment (-$20M, +10 Dev)", "Government Reform (+5 Stability)")
+            1 -> arrayOf("Industrial Subsidy (-$15M, +10 GDP)", "Worker Program (-$10M, +5 Happiness)")
+            2 -> arrayOf("Agricultural Support (-$10M, +5 GDP)", "Rural Development (-$8M, +5 Loyalty)")
+            3 -> arrayOf("Port Expansion (-$25M, +15 GDP)", "Tourism Campaign (-$12M, +10 GDP)")
+            4 -> arrayOf("Resource Extraction (-$20M, +20 GDP, -5 Env)", "Military Base (+10 Military)")
+            5 -> arrayOf("Border Security (-$15M, +10 Stability)", "Diplomatic Outreach (-$10M, +10 Int'l)")
+            else -> arrayOf("Development Project (-$10M, +5 Dev)")
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("${region.name} - Special Actions")
+            .setItems(actions) { _, which ->
+                when (region.id) {
+                    0 -> performCapitalAction(which)
+                    1 -> performIndustrialAction(which)
+                    2 -> performAgriculturalAction(which)
+                    3 -> performCoastalAction(which)
+                    4 -> performNorthernAction(which)
+                    5 -> performBorderAction(which)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun performCapitalAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 20000000) {
+                    country.treasury -= 20000000
+                    GameWorld.getRegionById(0)?.development = (GameWorld.getRegionById(0)?.development?.plus(10) ?: 0).coerceIn(0, 100)
+                    showToast("Capital invested! Development +10")
+                } else showToast("Need $20M")
+            }
+            1 -> {
+                country.stability = (country.stability + 5).coerceIn(0, 100)
+                showToast("Government reform! Stability +5")
+            }
+        }
+    }
+
+    private fun performIndustrialAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 15000000) {
+                    country.treasury -= 15000000
+                    country.gdp = (country.gdp + 10000000).coerceAtLeast(0.0)
+                    showToast("Industrial subsidy! GDP +$10M")
+                } else showToast("Need $15M")
+            }
+            1 -> {
+                if (country.treasury >= 10000000) {
+                    country.treasury -= 10000000
+                    country.happiness = (country.happiness + 5).coerceIn(0, 100)
+                    showToast("Worker program! Happiness +5")
+                } else showToast("Need $10M")
+            }
+        }
+    }
+
+    private fun performAgriculturalAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 10000000) {
+                    country.treasury -= 10000000
+                    country.gdp = (country.gdp + 5000000).coerceAtLeast(0.0)
+                    showToast("Agricultural support! GDP +$5M")
+                } else showToast("Need $10M")
+            }
+            1 -> {
+                if (country.treasury >= 8000000) {
+                    country.treasury -= 8000000
+                    GameWorld.getRegionById(2)?.loyalty = (GameWorld.getRegionById(2)?.loyalty?.plus(5) ?: 0).coerceIn(0, 100)
+                    showToast("Rural development! Loyalty +5")
+                } else showToast("Need $8M")
+            }
+        }
+    }
+
+    private fun performCoastalAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 25000000) {
+                    country.treasury -= 25000000
+                    country.gdp = (country.gdp + 15000000).coerceAtLeast(0.0)
+                    showToast("Port expansion! GDP +$15M")
+                } else showToast("Need $25M")
+            }
+            1 -> {
+                if (country.treasury >= 12000000) {
+                    country.treasury -= 12000000
+                    country.gdp = (country.gdp + 10000000).coerceAtLeast(0.0)
+                    showToast("Tourism campaign! GDP +$10M")
+                } else showToast("Need $12M")
+            }
+        }
+    }
+
+    private fun performNorthernAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 20000000) {
+                    country.treasury -= 20000000
+                    country.gdp = (country.gdp + 20000000).coerceAtLeast(0.0)
+                    country.environment = (country.environment - 5).coerceIn(0, 100)
+                    showToast("Resource extraction! GDP +$20M, Environment -5")
+                } else showToast("Need $20M")
+            }
+            1 -> {
+                country.military = (country.military + 10).coerceIn(0, 100)
+                showToast("Military base! Military +10")
+            }
+        }
+    }
+
+    private fun performBorderAction(which: Int) {
+        when (which) {
+            0 -> {
+                if (country.treasury >= 15000000) {
+                    country.treasury -= 15000000
+                    country.stability = (country.stability + 10).coerceIn(0, 100)
+                    showToast("Border security! Stability +10")
+                } else showToast("Need $15M")
+            }
+            1 -> {
+                if (country.treasury >= 10000000) {
+                    country.treasury -= 10000000
+                    country.internationalRelations = (country.internationalRelations + 10).coerceIn(0, 100)
+                    showToast("Diplomatic outreach! Int'l Relations +10")
+                } else showToast("Need $10M")
+            }
+        }
     }
 
     private fun showGameOver() {
