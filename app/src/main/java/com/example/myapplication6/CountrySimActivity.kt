@@ -256,7 +256,7 @@ class CountrySimActivity : AppCompatActivity() {
     private fun applyPassiveEffects() {
         // GDP growth based on various factors
         val gdpGrowthRate = ((country.education + country.infrastructure + country.stability) / 300.0) - 0.05
-        
+
         // Apply global economy modifier
         val economyModifier = when (GameWorld.globalEconomyState) {
             EconomyState.BOOMING -> 1.1
@@ -264,12 +264,12 @@ class CountrySimActivity : AppCompatActivity() {
             EconomyState.SLOWING -> 0.95
             EconomyState.RECESSION -> 0.9
         }
-        
+
         country.gdp = (country.gdp * (1 + gdpGrowthRate) * economyModifier).toLong()
 
         // Population growth
         val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
-        country.population = ((country.population * (1 + populationGrowthRate)).toLong()).coerceAtLeast(0)
+        country.population = ((country.population * (1 + populationGrowthRate)).toLong()).coerceAtLeast(0L)
 
         // Treasury changes
         val taxRevenue = country.gdp * 0.02 // 2% tax per turn
@@ -278,8 +278,8 @@ class CountrySimActivity : AppCompatActivity() {
         val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
             val bonus = GameWorld.getRegionBonus(region)
             ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
-        }.toLong()
-        
+        }
+
         val expenses = country.population * 10 + country.military * 100000 + country.education * 50000
         country.treasury = country.treasury + taxRevenue + regionBonus - expenses
 
@@ -740,7 +740,7 @@ class CountrySimActivity : AppCompatActivity() {
     private fun showTradeMenu() {
         val resources = EconomyManager.resources
         val resourceInfo = resources.map { r ->
-            "${r.name}: ${r.currentPrice.toString().take(6)} | Stock: ${r.stockpile.toString().takeBefore('.')}\nProd: ${r.production}/Cons: ${r.consumption} | Import: ${r.importAmount}/Export: ${r.exportAmount}"
+            "${r.name}: $${r.currentPrice.toString().take(6)} | Stock: ${r.stockpile.toLong()}\nProd: ${r.production}/Cons: ${r.consumption} | Import: ${r.importAmount}/Export: ${r.exportAmount}"
         }.toTypedArray()
         
         AlertDialog.Builder(this)
