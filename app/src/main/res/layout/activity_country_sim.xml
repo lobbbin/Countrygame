@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <!-- Header -->
         <TextView
@@ -19,318 +19,293 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Your Nation"
-            android:textSize="28sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/primary_text"
             android:gravity="center"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="4dp" />
 
         <TextView
             android:id="@+id/txtGovernmentType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Government: Democracy"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textColor="@color/secondary_text"
             android:gravity="center"
-            android:paddingBottom="16dp" />
+            android:paddingBottom="12dp" />
 
-        <!-- Country Info Card -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Country Info Box -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/box_background"
+            android:layout_marginBottom="12dp">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="Country Info"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:paddingBottom="8dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/info_header"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary"
-                    android:paddingBottom="12dp" />
+            <TextView
+                android:id="@+id/txtLeaderName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Leader: President"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="2dp" />
 
-                <TextView
-                    android:id="@+id/txtLeaderName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Leader: President"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="4dp" />
+            <TextView
+                android:id="@+id/txtCapitalCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Capital: Capital City"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="2dp" />
 
-                <TextView
-                    android:id="@+id/txtCapitalCity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Capital: Capital City"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="4dp" />
+            <TextView
+                android:id="@+id/txtYear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Year: 2024"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="2dp" />
 
-                <TextView
-                    android:id="@+id/txtYear"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Year: 2024"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="4dp" />
+            <TextView
+                android:id="@+id/txtTurn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Turn: 1"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text" />
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/txtTurn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Turn: 1"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Statistics Card -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Statistics Box -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/box_background"
+            android:layout_marginBottom="12dp">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="National Statistics"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:paddingBottom="8dp" />
+
+            <!-- Economy -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Economy"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_text"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <TextView
+                android:id="@+id/txtPopulation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Population: 1,000,000"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="1dp" />
+
+            <TextView
+                android:id="@+id/txtGDP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="GDP: $1,000,000,000"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="1dp" />
+
+            <TextView
+                android:id="@+id/txtTreasury"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Treasury: $100,000,000"
+                android:textSize="12sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="6dp" />
+
+            <!-- Stats Grid -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Indicators"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_text"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/txtStability"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/stats_header"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary"
-                    android:paddingBottom="12dp" />
-
-                <!-- Economic Stats -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Economy"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="4dp" />
+                    android:layout_columnWeight="1"
+                    android:text="Stability: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
                 <TextView
-                    android:id="@+id/txtPopulation"
-                    android:layout_width="match_parent"
+                    android:id="@+id/txtHappiness"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Population: 1,000,000"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="2dp" />
+                    android:layout_columnWeight="1"
+                    android:text="Happiness: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
                 <TextView
-                    android:id="@+id/txtGDP"
-                    android:layout_width="match_parent"
+                    android:id="@+id/txtMilitary"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="GDP: $1,000,000,000"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="2dp" />
+                    android:layout_columnWeight="1"
+                    android:text="Military: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
                 <TextView
-                    android:id="@+id/txtTreasury"
-                    android:layout_width="match_parent"
+                    android:id="@+id/txtInternationalRelations"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Treasury: $100,000,000"
-                    android:textSize="14sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="8dp" />
+                    android:layout_columnWeight="1"
+                    android:text="Int'l: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
-                <!-- National Stats Grid -->
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/txtEducation"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="National Indicators"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="4dp" />
+                    android:layout_columnWeight="1"
+                    android:text="Education: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
-                <GridLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/txtHealthcare"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:rowCount="4">
+                    android:layout_columnWeight="1"
+                    android:text="Healthcare: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
-                    <TextView
-                        android:id="@+id/txtStability"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Stability: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
+                <TextView
+                    android:id="@+id/txtInfrastructure"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Infrastructure: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
 
-                    <TextView
-                        android:id="@+id/txtHappiness"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Happiness: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
+                <TextView
+                    android:id="@+id/txtEnvironment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Environment: 50%"
+                    android:textSize="11sp"
+                    android:padding="2dp" />
+            </GridLayout>
+        </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/txtMilitary"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Military: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtInternationalRelations"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Int'l Relations: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtEducation"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Education: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtHealthcare"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Healthcare: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtInfrastructure"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Infrastructure: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtEnvironment"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:text="Environment: 50%"
-                        android:textSize="13sp"
-                        android:padding="4dp" />
-                </GridLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Event Card -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Event Box -->
+        <LinearLayout
             android:id="@+id/layoutEvent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:visibility="gone"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/event_background">
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/event_background"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/txtEventTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="Event Title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="8dp" />
 
-                <TextView
-                    android:id="@+id/txtEventTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Event Title"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="12dp" />
+            <TextView
+                android:id="@+id/txtEventDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Event description..."
+                android:textSize="13sp"
+                android:textColor="@color/primary_text"
+                android:paddingBottom="12dp" />
 
-                <TextView
-                    android:id="@+id/txtEventDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Event description goes here..."
-                    android:textSize="15sp"
-                    android:textColor="@color/primary_text"
-                    android:paddingBottom="16dp" />
+            <Button
+                android:id="@+id/btnChoice1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choice 1"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
 
-                <Button
-                    android:id="@+id/btnChoice1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Choice 1"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
+            <Button
+                android:id="@+id/btnChoice2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choice 2"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
 
-                <Button
-                    android:id="@+id/btnChoice2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Choice 2"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
-
-                <Button
-                    android:id="@+id/btnChoice3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Choice 3"
-                    android:textSize="14sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            <Button
+                android:id="@+id/btnChoice3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choice 3"
+                android:textSize="12sp" />
+        </LinearLayout>
 
         <!-- Action Buttons -->
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="8dp">
+            android:orientation="vertical">
 
             <Button
                 android:id="@+id/btnNextTurn"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="@string/next_turn"
-                android:textSize="18sp"
+                android:layout_height="56dp"
+                android:text="Next Turn"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.Material3.Button" />
+                android:layout_marginBottom="8dp" />
 
-            <!-- Advanced Management Buttons Row 1 -->
+            <!-- Row 1: Economy, Policies, Tech -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -340,89 +315,86 @@
                 <Button
                     android:id="@+id/btnEconomy"
                     android:layout_width="0dp"
-                    android:layout_height="55dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="Economy"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginEnd="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
                 <Button
                     android:id="@+id/btnPolicies"
                     android:layout_width="0dp"
-                    android:layout_height="55dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="Policies"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
                 <Button
                     android:id="@+id/btnTechnology"
                     android:layout_width="0dp"
-                    android:layout_height="55dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="Tech"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
             </LinearLayout>
 
-            <!-- Game Menu Buttons Row 2 -->
+            <!-- Row 2: Advisors, World, Regions -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="8dp">
 
                 <Button
                     android:id="@+id/btnNPCs"
                     android:layout_width="0dp"
-                    android:layout_height="50dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="Advisors"
-                    android:textSize="12sp"
-                    android:layout_marginEnd="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginEnd="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
                 <Button
                     android:id="@+id/btnWorldStatus"
                     android:layout_width="0dp"
-                    android:layout_height="50dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="World"
-                    android:textSize="12sp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
                 <Button
                     android:id="@+id/btnRegions"
                     android:layout_width="0dp"
-                    android:layout_height="50dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:text="Regions"
-                    android:textSize="12sp"
-                    android:layout_marginStart="4dp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp"
+                    style="?android:attr/buttonBarButtonStyle" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnNewGame"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="@string/new_game"
-                android:textSize="16sp"
-                style="@style/Widget.Material3.Button.TonalButton" />
+                android:layout_height="48dp"
+                android:text="New Game"
+                android:textSize="14sp"
+                style="?android:attr/buttonBarButtonStyle" />
         </LinearLayout>
 
         <!-- Bottom spacing -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="32dp" />
+            android:layout_height="24dp" />
     </LinearLayout>
 </ScrollView>
