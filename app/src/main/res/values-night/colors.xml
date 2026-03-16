@@ -1,2 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <!-- Dark Theme Colors -->
+    <color name="primary">#90CAF9</color>
+    <color name="primary_dark">#42A5F5</color>
+    <color name="primary_light">#1E3A5F</color>
+    <color name="accent">#FF8A65</color>
+    <color name="primary_text">#FFFFFF</color>
+    <color name="secondary_text">#B0B0B0</color>
+    <color name="background">#121212</color>
+    <color name="card_background">#1E1E1E</color>
+    <color name="event_background">#2D1F0F</color>
+    <color name="success">#81C784</color>
+    <color name="warning">#FFB74D</color>
+    <color name="error">#E57373</color>
+    <color name="box_border">#333333</color>
+</resources>
