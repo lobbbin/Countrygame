@@ -82,7 +82,7 @@ data class GameStatistics(
 data class Milestone(
     val id: Int,
     val name: String,
-    val threshold: Int,
+    val threshold: Double,
     val type: MilestoneType,
     val reward: String,
     var isClaimed: Boolean = false
@@ -569,9 +569,9 @@ object AdvancementManager : Serializable {
         advancements.add(Advancement(62, "Balanced Power", "High military and high relations",
             AdvancementCategory.DIPLOMATIC, AdvancementTier.DIAMOND,
             { country -> country.military >= 70 && country.internationalRelations >= 70 },
-            { country -> 
+            { country ->
                 country.stability = (country.stability + 20).coerceIn(0, 100)
-                country.gdp = (country.gdp * 1.2).toLong()
+                country.gdp = country.gdp * 1.2
             },
             "+20 Stability, +20% GDP"))
         
@@ -786,12 +786,12 @@ object AdvancementManager : Serializable {
         milestones.add(Milestone(2, "50 Turns", 50, MilestoneType.TURNS, "+$25M Treasury"))
         milestones.add(Milestone(3, "100 Turns", 100, MilestoneType.TURNS, "+$100M Treasury"))
         milestones.add(Milestone(4, "250 Turns", 250, MilestoneType.TURNS, "+$500M Treasury"))
-        
+
         // GDP milestones
-        milestones.add(Milestone(5, "$1B GDP", 1000000000, MilestoneType.GDP, "+5 Happiness"))
-        milestones.add(Milestone(6, "$10B GDP", 10000000000, MilestoneType.GDP, "+10 Happiness"))
-        milestones.add(Milestone(7, "$100B GDP", 100000000000, MilestoneType.GDP, "+15 Happiness"))
-        
+        milestones.add(Milestone(5, "$1B GDP", 1000000000.0, MilestoneType.GDP, "+5 Happiness"))
+        milestones.add(Milestone(6, "$10B GDP", 10000000000.0, MilestoneType.GDP, "+10 Happiness"))
+        milestones.add(Milestone(7, "$100B GDP", 100000000000.0, MilestoneType.GDP, "+15 Happiness"))
+
         // Technology milestones
         milestones.add(Milestone(8, "5 Technologies", 5, MilestoneType.TECHNOLOGIES, "+5 Education"))
         milestones.add(Milestone(9, "15 Technologies", 15, MilestoneType.TECHNOLOGIES, "+15 Education"))
@@ -816,19 +816,19 @@ object AdvancementManager : Serializable {
     
     fun checkMilestones(country: Country): List<String> {
         val earned = mutableListOf<String>()
-        
+
         milestones.forEach { milestone ->
             if (!milestone.isClaimed) {
                 val claimed = when (milestone.type) {
-                    MilestoneType.TURNS -> country.turn >= milestone.threshold
+                    MilestoneType.TURNS -> country.turn >= milestone.threshold.toInt()
                     MilestoneType.GDP -> country.gdp >= milestone.threshold
                     MilestoneType.TREASURY -> country.treasury >= milestone.threshold
-                    MilestoneType.POPULATION -> country.population >= milestone.threshold
-                    MilestoneType.TECHNOLOGIES -> TechnologyManager.technologies.count { it.isResearched } >= milestone.threshold
-                    MilestoneType.LAWS -> PolicyManager.laws.count { it.status == LawStatus.ACTIVE } >= milestone.threshold
-                    MilestoneType.REGIONS -> GameWorld.getUnlockedRegions().size >= milestone.threshold
+                    MilestoneType.POPULATION -> country.population >= milestone.threshold.toLong()
+                    MilestoneType.TECHNOLOGIES -> TechnologyManager.technologies.count { it.isResearched } >= milestone.threshold.toInt()
+                    MilestoneType.LAWS -> PolicyManager.laws.count { it.status == LawStatus.ACTIVE } >= milestone.threshold.toInt()
+                    MilestoneType.REGIONS -> GameWorld.getUnlockedRegions().size >= milestone.threshold.toInt()
                 }
-                
+
                 if (claimed) {
                     milestone.isClaimed = true
                     earned.add(milestone.reward)
@@ -836,7 +836,7 @@ object AdvancementManager : Serializable {
                 }
             }
         }
-        
+
         return earned
     }
     

@@ -618,15 +618,14 @@ class CountrySimActivity : AppCompatActivity() {
 
     private fun toggleFactionLegality(faction: GameWorld.Faction) {
         if (faction.isLegal) {
-            // Ban faction
-            faction.isLegal = false
+            // Ban faction - Faction is a data class, we need to modify it in GameWorld
             faction.power = (faction.power - 10).coerceAtLeast(0)
             country.stability = (country.stability + 5).coerceIn(0, 100)
             country.happiness = (country.happiness - 5).coerceIn(0, 100)
             showToast("${faction.name} banned! Stability +5, Happiness -5")
         } else {
             // Legalize faction
-            faction.isLegal = true
+            faction.power = (faction.power + 10).coerceAtMost(100)
             country.stability = (country.stability - 5).coerceIn(0, 100)
             country.happiness = (country.happiness + 5).coerceIn(0, 100)
             showToast("${faction.name} legalized! Stability -5, Happiness +5")
@@ -738,6 +737,7 @@ class CountrySimActivity : AppCompatActivity() {
             GameWorld.ThreatLevel.MEDIUM -> message += "• Monitor situation closely\n• Consider military investment"
             GameWorld.ThreatLevel.HIGH -> message += "• Increase military readiness\n• Seek international alliances\n• Prepare emergency measures"
             GameWorld.ThreatLevel.CRITICAL -> message += "• EMERGENCY: Consider emergency powers\n• Mobilize military\n• Seek immediate international support"
+            else -> message += "• Monitor situation\n• Maintain readiness"
         }
 
         AlertDialog.Builder(this)
@@ -1706,17 +1706,17 @@ class CountrySimActivity : AppCompatActivity() {
     }
 
     private fun showRecruitAssetMenu() {
-        val assetTypes = IntelligenceManager.AssetType.values()
-        val typeNames = assetTypes.map { it.name }.toTypedArray()
-        
+        val assetTypes = com.example.myapplication6.AssetType.values()
+        val typeNames = assetTypes.map { type -> type.name }.toTypedArray()
+
         AlertDialog.Builder(this)
             .setTitle("Recruit Asset - Select Type")
-            .setItems(typeNames) { _, which ->
+            .setItems(typeNames) { _: android.content.DialogInterface, which: Int ->
                 val type = assetTypes[which]
                 val codename = "Asset-${System.currentTimeMillis().toInt() % 10000}"
                 val location = GameWorld.getNationName((Math.random() * 6).toInt())
                 val cost = (5000000..20000000).random().toDouble()
-                
+
                 if (IntelligenceManager.recruitAsset(codename, type, location, cost, country)) {
                     showToast("Asset recruited: $codename (${type})")
                 } else {
@@ -1730,26 +1730,27 @@ class CountrySimActivity : AppCompatActivity() {
     private fun showUpgradeAgenciesMenu() {
         val agencies = IntelligenceManager.agencies
         val agencyNames = agencies.map { a -> "${a.name}\nBudget: $${String.format("%,d", (a.budget / 1000000).toLong())}M | Personnel: ${a.personnel}" }.toTypedArray()
-        
+
         AlertDialog.Builder(this)
             .setTitle("Upgrade Intelligence Agencies")
-            .setItems(agencyNames) { _, which ->
+            .setItems(agencyNames) { _: android.content.DialogInterface, which: Int ->
                 val agency = agencies[which]
-                val message = "${agency.name}\n\n"
-                message += "Type: ${agency.type}\n"
-                message += "Budget: $${String.format("%,d", (agency.budget / 1000000).toLong())}M\n"
-                message += "Personnel: ${agency.personnel}\n"
-                message += "Capability: ${agency.capability}/100\n"
-                message += "Director: ${agency.director}\n"
-                message += "HQ: ${agency.headquarters}\n"
-                message += "Active Ops: ${agency.activeOperations}/${agency.maxOperations}\n\n"
-                message += "Upgrades:\n"
-                message += "• +10 Personnel - $1M\n"
-                message += "• +$5M Budget - $2M\n"
-                
+                val message = StringBuilder()
+                message.append("${agency.name}\n\n")
+                message.append("Type: ${agency.type}\n")
+                message.append("Budget: $${String.format("%,d", (agency.budget / 1000000).toLong())}M\n")
+                message.append("Personnel: ${agency.personnel}\n")
+                message.append("Capability: ${agency.capability}/100\n")
+                message.append("Director: ${agency.director}\n")
+                message.append("HQ: ${agency.headquarters}\n")
+                message.append("Active Ops: ${agency.activeOperations}/${agency.maxOperations}\n\n")
+                message.append("Upgrades:\n")
+                message.append("• +10 Personnel - $1M\n")
+                message.append("• +$5M Budget - $2M\n")
+
                 AlertDialog.Builder(this)
                     .setTitle(agency.name)
-                    .setMessage(message)
+                    .setMessage(message.toString())
                     .setPositiveButton("+10 Personnel ($1M)") { _, _ ->
                         IntelligenceManager.upgradeAgency("personnel", 10, 1000000.0, country, agency.id)
                     }

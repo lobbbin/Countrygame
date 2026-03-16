@@ -526,10 +526,10 @@ object CrisisManager : Serializable {
                 responseOptions = listOf(
                     CrisisResponse(1, "Food Imports", "Import emergency food supplies",
                         75000000.0, 0.85, 0.1, mapOf<String, Int>("treasury" to 50000000),
-                        mapOf("happiness" to 30.0, "healthcare" to 20.0, "population" to 50000)),
+                        mapOf("happiness" to 30.0, "healthcare" to 20.0, "population" to 50000.0)),
                     CrisisResponse(2, "Rationing", "Implement strict food rationing",
                         10000000.0, 0.6, 0.2, mapOf<String, Int>(),
-                        mapOf("happiness" to -20.0, "stability" to 10.0, "population" to -50000)),
+                        mapOf("happiness" to -20.0, "stability" to 10.0, "population" to -50000.0)),
                     CrisisResponse(3, "International Aid", "Request food aid from UN",
                         5000000.0, 0.7, 0.3, mapOf<String, Int>(),
                         mapOf("happiness" to 20.0, "internationalRelations" to -15.0))
@@ -683,7 +683,7 @@ object CrisisManager : Serializable {
             "military" -> country.military = (country.military + value.toInt()).coerceIn(0, 100)
             "internationalRelations" -> country.internationalRelations = (country.internationalRelations + value.toInt()).coerceIn(0, 100)
             "environment" -> country.environment = (country.environment + value.toInt()).coerceIn(0, 100)
-            "population" -> country.population = (country.population + value.toLong()).coerceAtLeast(0)
+            "population" -> country.population = (country.population + value.toInt()).coerceAtLeast(0)
             "education" -> country.education = (country.education + value.toInt()).coerceIn(0, 100)
         }
     }

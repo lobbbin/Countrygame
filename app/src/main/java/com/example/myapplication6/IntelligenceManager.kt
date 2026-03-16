@@ -323,7 +323,24 @@ object IntelligenceManager : Serializable {
         report.append("Successful Ops: $successfulOps\n")
         report.append("Failed Ops: $failedOps\n")
         report.append("Scandals: $scandals\n")
-        
+
         return report.toString()
+    }
+
+    fun upgradeAgency(stat: String, amount: Int, cost: Double, country: Country, agencyId: Int): Boolean {
+        if (country.treasury < cost) return false
+
+        val agency = agencies.find { it.id == agencyId }
+        if (agency == null) return false
+
+        country.treasury -= cost
+
+        when (stat) {
+            "personnel" -> agency.personnel += amount
+            "budget" -> agency.budget += amount.toDouble()
+            "capability" -> agency.capability = (agency.capability + amount).coerceIn(0, 100)
+        }
+
+        return true
     }
 }
