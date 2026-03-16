@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">My Application6</string>
-
+    <string name="app_name">Country Sim</string>
+    <string name="country_sim_name">Country Simulator</string>
+    <string name="new_game">New Game</string>
+    <string name="next_turn">Next Turn</string>
+    <string name="stats_header">National Statistics</string>
+    <string name="info_header">Country Information</string>
 </resources>
