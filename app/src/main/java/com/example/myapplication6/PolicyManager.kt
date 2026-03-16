@@ -669,7 +669,7 @@ object PolicyManager : Serializable {
                     false
                 }
             }
-            
+
             // Ministry efficiency changes
             val efficiencyChange = when {
                 ministry.budget > 50000000 -> 2.0
@@ -677,9 +677,48 @@ object PolicyManager : Serializable {
                 ministry.budget < 10000000 -> -2.0
                 else -> 0.0
             }
-            
+
             ministry.efficiency = (ministry.efficiency + efficiencyChange).coerceIn(30.0, 100.0)
         }
+    }
+
+    fun processLawsTurn(country: Country): List<String> {
+        val newlyPassed = mutableListOf<String>()
+        
+        laws.forEach { law ->
+            when (law.status) {
+                LawStatus.PROPOSED -> {
+                    // Move to committee automatically
+                    law.status = LawStatus.IN_COMMITTEE
+                }
+                LawStatus.IN_COMMITTEE -> {
+                    // Process in committee (2 turns)
+                    if (processLawInCommittee(law)) {
+                        // Successfully moved to parliament
+                    }
+                }
+                LawStatus.IN_PARLIAMENT -> {
+                    // Vote in parliament (1 turn)
+                    val vote = processLawInParliament(law)
+                    if (vote.isPassed) {
+                        enactLaw(law, country)
+                        newlyPassed.add(law.name)
+                    }
+                }
+                LawStatus.ACTIVE -> {
+                    // Law is active - no processing needed
+                }
+                else -> {
+                    // Vetoed, repealed, expired - remove next cleanup
+                }
+            }
+        }
+
+        // Clean up old laws
+        laws.removeAll { it.status == LawStatus.VETOED || it.status == LawStatus.REPEALED || it.status == LawStatus.EXPIRED }
+        
+        // Return passed laws for notification
+        return newlyPassed
     }
     
     fun processElection(country: Country) {

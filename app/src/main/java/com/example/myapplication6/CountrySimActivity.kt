@@ -224,6 +224,10 @@ class CountrySimActivity : AppCompatActivity() {
 
             // Process policy systems
             PolicyManager.processMinistryTurn()
+            val passedLaws = PolicyManager.processLawsTurn(country)
+            passedLaws.forEach { law ->
+                showToast("Law passed: $law!")
+            }
 
             // Process technology
             TechnologyManager.processResearchTurn(country)
