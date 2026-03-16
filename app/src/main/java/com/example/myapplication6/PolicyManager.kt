@@ -65,7 +65,7 @@ data class Ministry(
     val name: String,
     val minister: NPC,
     val budget: Double,
-    val efficiency: Double,
+    var efficiency: Double,
     val projects: MutableList<GovernmentProject>,
     val employees: Int,
     val description: String

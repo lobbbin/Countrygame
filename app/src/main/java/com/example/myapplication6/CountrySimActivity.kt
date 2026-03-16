@@ -265,11 +265,11 @@ class CountrySimActivity : AppCompatActivity() {
             EconomyState.RECESSION -> 0.9
         }
 
-        country.gdp = (country.gdp * (1 + gdpGrowthRate) * economyModifier).toLong()
+        country.gdp = country.gdp * (1 + gdpGrowthRate) * economyModifier
 
         // Population growth
         val populationGrowthRate = ((country.healthcare + country.happiness) / 200.0) - 0.02
-        country.population = (country.population * (1 + populationGrowthRate)).toLong()
+        country.population = (country.population * (1 + populationGrowthRate)).toInt()
 
         // Treasury changes
         val taxRevenue = country.gdp * 0.02 // 2% tax per turn
@@ -278,9 +278,9 @@ class CountrySimActivity : AppCompatActivity() {
         val regionBonus = GameWorld.getUnlockedRegions().sumOf { region ->
             val bonus = GameWorld.getRegionBonus(region)
             ((bonus["tax"] ?: 1.0) - 1.0) * country.gdp * 0.001
-        }.toLong()
+        }
 
-        val expenses = (country.population * 10L + country.military * 100000L + country.education * 50000L).toInt()
+        val expenses = country.population * 10 + country.military * 100000 + country.education * 50000
         country.treasury = country.treasury + taxRevenue + regionBonus - expenses
 
         // Clamp values
@@ -498,7 +498,7 @@ class CountrySimActivity : AppCompatActivity() {
         val allRegions = GameWorld.getAllRegions()
 
         val regionNames: Array<String> = allRegions.map { region ->
-            val status = if (region.isUnlocked) {
+            if (region.isUnlocked) {
                 "✓ ${region.name} (Dev: ${region.development}%, Loyalty: ${region.loyalty}%)"
             } else {
                 "🔒 ${region.name} - Locked"

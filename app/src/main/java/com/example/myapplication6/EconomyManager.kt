@@ -100,9 +100,9 @@ data class EconomicPolicy(
     val effects: Map<String, Double>,
     val cost: Double,
     val duration: Int,
+    val requirements: Map<String, Double> = emptyMap(),
     var isActive: Boolean = false,
-    var turnsRemaining: Int = 0,
-    val requirements: Map<String, Double> = emptyMap()
+    var turnsRemaining: Int = 0
 ) : Serializable
 
 enum class PolicyType {
