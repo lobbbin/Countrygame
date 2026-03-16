@@ -26,9 +26,9 @@ data class CulturalInstitution(
     val id: Int,
     val name: String,
     val type: CulturalInstitutionType,
-    val quality: Int, // 0-100
-    val visitors: Int,
-    val revenue: Double,
+    var quality: Int, // 0-100
+    var visitors: Int,
+    var revenue: Double,
     val cost: Double,
     val region: Int,
     var isFunded: Boolean = true,

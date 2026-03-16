@@ -42,16 +42,16 @@ data class CrimeIncident(
 data class PoliceAgency(
     val id: Int,
     val name: String,
-    val type: AgencyType,
-    val budget: Double,
-    val personnel: Int,
-    val equipment: Int,
-    val successRate: Double,
-    val corruptionLevel: Int,
+    val type: PoliceAgencyType,
+    var budget: Double,
+    var personnel: Int,
+    var equipment: Int,
+    var successRate: Double,
+    var corruptionLevel: Int,
     var activeOperations: Int = 0
 ) : Serializable
 
-enum class AgencyType {
+enum class PoliceAgencyType {
     LOCAL_POLICE,
     STATE_POLICE,
     FEDERAL_INVESTIGATION,
@@ -123,15 +123,15 @@ object CrimeJusticeManager : Serializable {
         activeCases.clear()
 
         // Create starting police agencies
-        policeAgencies.add(PoliceAgency(1, "Capital Police Department", AgencyType.LOCAL_POLICE,
+        policeAgencies.add(PoliceAgency(1, "Capital Police Department", PoliceAgencyType.LOCAL_POLICE,
             50000000.0, 5000, 70, 65.0, 15))
-        policeAgencies.add(PoliceAgency(2, "Federal Investigation Bureau", AgencyType.FEDERAL_INVESTIGATION,
+        policeAgencies.add(PoliceAgency(2, "Federal Investigation Bureau", PoliceAgencyType.FEDERAL_INVESTIGATION,
             100000000.0, 10000, 85, 80.0, 10))
-        policeAgencies.add(PoliceAgency(3, "Drug Enforcement Administration", AgencyType.DRUG_ENFORCEMENT,
+        policeAgencies.add(PoliceAgency(3, "Drug Enforcement Administration", PoliceAgencyType.DRUG_ENFORCEMENT,
             40000000.0, 3000, 75, 70.0, 20))
-        policeAgencies.add(PoliceAgency(4, "Counter-Terrorism Unit", AgencyType.COUNTER_TERRORISM,
+        policeAgencies.add(PoliceAgency(4, "Counter-Terrorism Unit", PoliceAgencyType.COUNTER_TERRORISM,
             60000000.0, 2000, 90, 75.0, 5))
-        policeAgencies.add(PoliceAgency(5, "Cyber Crime Division", AgencyType.CYBER_CRIME_UNIT,
+        policeAgencies.add(PoliceAgency(5, "Cyber Crime Division", PoliceAgencyType.CYBER_CRIME_UNIT,
             30000000.0, 1500, 80, 60.0, 10))
 
         updateStatistics()

@@ -42,13 +42,13 @@ data class TransportInfrastructure(
     val name: String,
     val type: InfrastructureType,
     val mode: TransportMode,
-    val capacity: Int,
-    val usage: Int,
-    val condition: Int, // 0-100
+    var capacity: Int,
+    var usage: Int,
+    var condition: Int, // 0-100
     val region: Int,
     val constructionCost: Double,
     val maintenanceCost: Double,
-    val revenue: Double,
+    var revenue: Double,
     val yearBuilt: Int
 ) : Serializable
 
@@ -57,23 +57,23 @@ data class VehicleFleet(
     val id: Int,
     val name: String,
     val type: TransportMode,
-    val vehicleCount: Int,
-    val averageAge: Double,
-    val efficiency: Double, // 0-100
-    val emissions: Double, // tons CO2 per year
-    val operatingCost: Double
+    var vehicleCount: Int,
+    var averageAge: Double,
+    var efficiency: Double, // 0-100
+    var emissions: Double, // tons CO2 per year
+    var operatingCost: Double
 ) : Serializable
 
 // Logistics network
 data class LogisticsNetwork(
     val id: Int,
     val name: String,
-    val hubs: Int,
-    val routes: Int,
-    val efficiency: Double, // 0-100
-    val capacity: Int,
-    val utilization: Double, // 0-100
-    val deliveryTime: Double // average days
+    var hubs: Int,
+    var routes: Int,
+    var efficiency: Double, // 0-100
+    var capacity: Int,
+    var utilization: Double, // 0-100
+    var deliveryTime: Double // average days
 ) : Serializable
 
 // Transportation statistics
@@ -123,11 +123,11 @@ object TransportationManager : Serializable {
 
         // Create vehicle fleets
         fleets.add(VehicleFleet(1, "Public Bus Fleet", TransportMode.PUBLIC_TRANSIT,
-            5000, 8.5, 70, 500000.0, 100000000.0))
+            5000, 8.5, 70.0, 500000.0, 100000000.0))
         fleets.add(VehicleFleet(2, "National Rail Fleet", TransportMode.RAIL,
-            2000, 15.0, 65, 800000.0, 150000000.0))
+            2000, 15.0, 65.0, 800000.0, 150000000.0))
         fleets.add(VehicleFleet(3, "Freight Truck Fleet", TransportMode.ROAD,
-            50000, 10.0, 75, 2000000.0, 500000000.0))
+            50000, 10.0, 75.0, 2000000.0, 500000000.0))
 
         // Create logistics networks
         logisticsNetworks.add(LogisticsNetwork(1, "National Freight Network",

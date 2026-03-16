@@ -780,12 +780,12 @@ object AdvancementManager : Serializable {
     
     private fun initializeMilestones() {
         milestones.clear()
-        
+
         // Turn milestones
-        milestones.add(Milestone(1, "10 Turns", 10, MilestoneType.TURNS, "+$5M Treasury"))
-        milestones.add(Milestone(2, "50 Turns", 50, MilestoneType.TURNS, "+$25M Treasury"))
-        milestones.add(Milestone(3, "100 Turns", 100, MilestoneType.TURNS, "+$100M Treasury"))
-        milestones.add(Milestone(4, "250 Turns", 250, MilestoneType.TURNS, "+$500M Treasury"))
+        milestones.add(Milestone(1, "10 Turns", 10.0, MilestoneType.TURNS, "+$5M Treasury"))
+        milestones.add(Milestone(2, "50 Turns", 50.0, MilestoneType.TURNS, "+$25M Treasury"))
+        milestones.add(Milestone(3, "100 Turns", 100.0, MilestoneType.TURNS, "+$100M Treasury"))
+        milestones.add(Milestone(4, "250 Turns", 250.0, MilestoneType.TURNS, "+$500M Treasury"))
 
         // GDP milestones
         milestones.add(Milestone(5, "$1B GDP", 1000000000.0, MilestoneType.GDP, "+5 Happiness"))
@@ -793,9 +793,9 @@ object AdvancementManager : Serializable {
         milestones.add(Milestone(7, "$100B GDP", 100000000000.0, MilestoneType.GDP, "+15 Happiness"))
 
         // Technology milestones
-        milestones.add(Milestone(8, "5 Technologies", 5, MilestoneType.TECHNOLOGIES, "+5 Education"))
-        milestones.add(Milestone(9, "15 Technologies", 15, MilestoneType.TECHNOLOGIES, "+15 Education"))
-        milestones.add(Milestone(10, "30 Technologies", 30, MilestoneType.TECHNOLOGIES, "+30 Education"))
+        milestones.add(Milestone(8, "5 Technologies", 5.0, MilestoneType.TECHNOLOGIES, "+5 Education"))
+        milestones.add(Milestone(9, "15 Technologies", 15.0, MilestoneType.TECHNOLOGIES, "+15 Education"))
+        milestones.add(Milestone(10, "30 Technologies", 30.0, MilestoneType.TECHNOLOGIES, "+30 Education"))
     }
     
     fun checkAdvancements(country: Country) {

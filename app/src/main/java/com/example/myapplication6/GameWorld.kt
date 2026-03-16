@@ -625,7 +625,7 @@ data class Faction(
     val ideology: FactionIdeology,
     val leader: String,
     val goals: List<String>,
-    val isLegal: Boolean
+    var isLegal: Boolean
 ) : Serializable
 
 data class WorldEvent(

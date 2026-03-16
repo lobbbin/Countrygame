@@ -618,13 +618,15 @@ class CountrySimActivity : AppCompatActivity() {
 
     private fun toggleFactionLegality(faction: GameWorld.Faction) {
         if (faction.isLegal) {
-            // Ban faction - Faction is a data class, we need to modify it in GameWorld
+            // Ban faction
+            faction.isLegal = false
             faction.power = (faction.power - 10).coerceAtLeast(0)
             country.stability = (country.stability + 5).coerceIn(0, 100)
             country.happiness = (country.happiness - 5).coerceIn(0, 100)
             showToast("${faction.name} banned! Stability +5, Happiness -5")
         } else {
             // Legalize faction
+            faction.isLegal = true
             faction.power = (faction.power + 10).coerceAtMost(100)
             country.stability = (country.stability - 5).coerceIn(0, 100)
             country.happiness = (country.happiness + 5).coerceIn(0, 100)

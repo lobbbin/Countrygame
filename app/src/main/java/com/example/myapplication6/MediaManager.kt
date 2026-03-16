@@ -24,9 +24,9 @@ data class NewsChannel(
     val id: Int,
     val name: String,
     val type: MediaType,
-    val audience: Int,
-    val credibility: Int,
-    val politicalBias: Int, // -100 (left) to 100 (right)
+    var audience: Int,
+    var credibility: Int,
+    var politicalBias: Int, // -100 (left) to 100 (right)
     var isStateControlled: Boolean = false,
     var isBanned: Boolean = false,
     val owner: String,
