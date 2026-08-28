@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+
+# Runtime data (SQLite, generated at runtime)
+backend/data/
+data/
+
+# Logs
+*.log
+
+# Environment
+backend/.env
+.env
